@@ -24,19 +24,23 @@ import (
 )
 
 func staticClientExample() {
+	klog.Infof("------staticClientExample start 111--------")
 	staticClient, err := client.NewClient("http://localhost:8080/")
 	if err != nil {
 		klog.Errorf("tried to make client and got error %v", err)
 		return
 	}
+	klog.Infof("------staticClientExample start 222--------")
 	einfo, err := staticClient.EventStaticInfo("?oom_events=true")
 	if err != nil {
 		klog.Errorf("got error retrieving event info: %v", err)
 		return
 	}
+	klog.Infof("------staticClientExample start 333--------")
 	for idx, ev := range einfo {
 		klog.Infof("static einfo %v: %v", idx, ev)
 	}
+	klog.Infof("------staticClientExample end--------")
 }
 
 func streamingClientExample(url string) {
