@@ -35,6 +35,14 @@ func staticClientTmingExample() {
 		return
 	}
 	klog.Infof("machine: %v", machine)
+
+
+	ci, err := staticClient.ContainerInfo("busybox", nil)
+	if err != nil {
+		klog.Errorf("got machine info: %v", err)
+		return
+	}
+	klog.Infof("ci: %v", ci)
 }
 
 func staticClientExample() {
