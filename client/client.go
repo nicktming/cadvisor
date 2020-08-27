@@ -166,6 +166,9 @@ func (c *Client) eventsInfoURL(name string) string {
 }
 
 func (c *Client) httpGetJSONData(data, postData interface{}, url, infoName string) error {
+
+	fmt.Printf("=====>httpGetJSONData url: %v\n", url)
+
 	var resp *http.Response
 	var err error
 
