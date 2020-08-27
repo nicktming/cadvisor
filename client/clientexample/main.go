@@ -23,6 +23,20 @@ import (
 	"k8s.io/klog/v2"
 )
 
+func staticClientTmingExample() {
+	staticClient, err := client.NewClient("http://localhost:8080/")
+	if err != nil {
+		klog.Errorf("tried to make client and got error %v", err)
+		return
+	}
+	machine, err := staticClient.MachineInfo()
+	if err != nil {
+		klog.Errorf("got machine info: %v", err)
+		return
+	}
+	klog.Infof("machine: %v", machine)
+}
+
 func staticClientExample() {
 	klog.Infof("------staticClientExample start 111--------")
 	staticClient, err := client.NewClient("http://localhost:8080/")
@@ -67,5 +81,6 @@ func main() {
 	klog.InitFlags(nil)
 	flag.Parse()
 	staticClientExample()
+	staticClientTmingExample()
 	streamingClientExample("?creation_events=true&stream=true&oom_events=true&deletion_events=true")
 }
