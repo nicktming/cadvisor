@@ -4,6 +4,7 @@ import (
 	"github.com/opencontainers/runc/libcontainer/cgroups"
 	"github.com/google/cadvisor/container"
 	"fmt"
+	"k8s.io/klog"
 )
 
 type CgroupSubsystems struct {
@@ -15,7 +16,7 @@ type CgroupSubsystems struct {
 
 
 func GetCgroupSubsystems(includedMetrics container.MetricSet) (CgroupSubsystems, error) {
-	allCgroups, err := cgroups.GetCgroupMount(true)
+	allCgroups, err := cgroups.GetCgroupMounts(true)
 	if err != nil {
 		return CgroupSubsystems{}, err
 	}
@@ -61,7 +62,7 @@ func getCgroupSubsystemsHelper(allCgroups []cgroups.Mount, disableCgroups map[st
 			}
 			if _, ok := mountPoints[subsystem]; ok {
 				// duplicate mount for this subsystem; use the first one we saw
-				klog.V(5).Infof("skipping %s, already using mount at %s", mount.Mountpoint, mountPoints[subsystem])
+				klog.Infof("skipping %s, already using mount at %s", mount.Mountpoint, mountPoints[subsystem])
 				continue
 			}
 			if _, ok := recordedMountpoints[mount.Mountpoint]; !ok {
