@@ -6,6 +6,10 @@ import (
 	"github.com/opencontainers/runc/libcontainer/cgroups"
 	"k8s.io/klog"
 	"os"
+	"github.com/google/cadvisor/watcher"
+	"github.com/google/cadvisor/container"
+	"github.com/google/cadvisor/fs"
+	"github.com/google/cadvisor/container/raw"
 )
 
 type Manager interface {
@@ -19,6 +23,9 @@ type namespacedContainerName struct {
 
 type manager struct {
 	containers 		map[namespacedContainerName]*containerData
+	containerWatchers 	[]watcher.ContainerWatcher
+	fsInfo 			fs.FsInfo
+	includedMetrics 	container.MetricSet
 }
 
 func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs) (Manager, error) {
@@ -53,3 +60,77 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs) (Manager, error) 
 	return newManager, nil
 
 }
+
+func (m *manager) Start() error {
+	m.containerWatchers = container.InitializePlugins(m.fsInfo, m.includedMetrics)
+
+	err := raw.Register(m.fsInfo, m.includedMetrics)
+	if err != nil {
+		klog.Errorf("Registration of the raw container factory failed: %v", err)
+	}
+
+	rawWatcher, err := raw.NewRawContainerWatcher()
+	if err != nil {
+		return err
+	}
+	m.containerWatchers = append(m.containerWatchers, rawWatcher)
+	return nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
