@@ -45,6 +45,11 @@ func NewRawContainerWatcher() (watcher.ContainerWatcher, error) {
 		stopWatcher:      make(chan error),
 	}
 
+	klog.Infof("=============NewRawContainerWatcher print rawWatcher")
+	for k, v := range rawWatcher.cgroupPaths {
+		klog.Infof("rawWatcher.cgroupPaths %v=%v", k, v)
+	}
+
 	return rawWatcher, nil
 }
 
