@@ -14,6 +14,16 @@ type CgroupSubsystems struct {
 	MountPoints 	map[string]string
 }
 
+func (cs CgroupSubsystems) String() {
+	klog.Infof("==========CgroupSubsystems========")
+	for _, m := range cs.Mounts {
+		klog.Infof("mount: %v", m)
+	}
+	for k, v := range cs.MountPoints {
+		klog.Infof("MountPoints %v:%v", k, v)
+	}
+}
+
 
 func GetCgroupSubsystems(includedMetrics container.MetricSet) (CgroupSubsystems, error) {
 	allCgroups, err := cgroups.GetCgroupMounts(true)

@@ -5,6 +5,7 @@ import (
 	"github.com/google/cadvisor/container/common"
 	"github.com/google/cadvisor/watcher"
 	"fmt"
+	"k8s.io/klog"
 )
 
 type rawContainerWatcher struct {
@@ -21,6 +22,10 @@ type rawContainerWatcher struct {
 
 func NewRawContainerWatcher() (watcher.ContainerWatcher, error) {
 	cgroupSubsystems, err := libcontainer.GetAllCgroupSubsystems()
+
+	klog.Infof("======>NewRawContainerWatcher got cgroupSubsystems")
+	cgroupSubsystems.String()
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cgroup subsystems: %v", err)
 	}
