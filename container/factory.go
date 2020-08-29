@@ -130,6 +130,12 @@ func RegisterContainerHandlerFactory(factory ContainerHandlerFactory, watchTypes
 	}
 }
 
+func HasFactories() bool {
+	factoriesLock.Lock()
+	defer factoriesLock.Unlock()
+
+	return len(factories) != 0
+}
 
 
 

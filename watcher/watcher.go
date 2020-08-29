@@ -23,7 +23,7 @@ type ContainerEvent struct {
 
 type ContainerWatcher interface {
 
-	//Start(events chan ContainerEvent) error
-	//
-	//Stop() error
+	Start(events chan ContainerEvent) error
+
+	Stop() error
 }

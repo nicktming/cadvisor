@@ -20,3 +20,6 @@ func main() {
 		klog.Fatal("Failed to start manager: %v", err)
 	}
 }
+
+// TODO
+// 1. watch raw removeWatchDirectory

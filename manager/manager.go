@@ -26,6 +26,7 @@ type manager struct {
 	containerWatchers 	[]watcher.ContainerWatcher
 	fsInfo 			fs.FsInfo
 	includedMetrics 	container.MetricSet
+	eventsChannel 		chan watcher.ContainerEvent
 }
 
 func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs) (Manager, error) {
@@ -53,8 +54,11 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs) (Manager, error) 
 
 	klog.Infof("cadvisor with inHostNamespace: %v and selfContainer: %v", inHostNamespace, selfContainer)
 
+	eventsChannel := make(chan watcher.ContainerEvent, 16)
+
 	newManager := &manager{
 		containers: 			make(map[namespacedContainerName]*containerData),
+		eventsChannel: 			eventsChannel,
 	}
 
 	return newManager, nil
@@ -74,6 +78,33 @@ func (m *manager) Start() error {
 		return err
 	}
 	m.containerWatchers = append(m.containerWatchers, rawWatcher)
+
+	if !container.HasFactories() {
+		klog.Infof("there is no factory and exit")
+		return nil
+	}
+
+	// TODO create quit channels
+
+	quitWatcher := make(chan error)
+	err = m.watchForNewContainers(quitWatcher)
+	if err != nil {
+		return err
+	}
+
+
+	return nil
+}
+
+func (m *manager) watchForNewContainers(quit chan error) error {
+	for _, watcher := range m.containerWatchers {
+		err := watcher.Start(m.eventsChannel)
+		if err != nil {
+			return err
+		}
+	}
+	// TODO watcher stop
+
 	return nil
 }
 
