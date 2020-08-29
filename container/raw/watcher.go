@@ -11,6 +11,7 @@ import (
 	"path"
 	"os"
 	inotify "k8s.io/utils/inotify"
+	"log"
 )
 
 type rawContainerWatcher struct {
@@ -58,7 +59,7 @@ func NewRawContainerWatcher() (watcher.ContainerWatcher, error) {
 	return rawWatcher, nil
 }
 
-func (w *rawContainerWatcher) Start(events chan watcher.ContainerEvent, dir string, containerName string) (bool, error) {
+func (w *rawContainerWatcher) Start(events chan watcher.ContainerEvent) error {
 	// TODO .mount
 	for _, cgroupPath := range w.cgroupPaths {
 		_, err := w.watchDirectory(events, cgroupPath, "/")
@@ -89,6 +90,7 @@ func (w *rawContainerWatcher) Start(events chan watcher.ContainerEvent, dir stri
 			}
 		}
 	}()
+	return nil 
 }
 
 func (w *rawContainerWatcher) Stop() error {
@@ -124,6 +126,8 @@ func (w *rawContainerWatcher) watchDirectory(events chan watcher.ContainerEvent,
 		if entry.IsDir() {
 			entryPath := path.Join(dir, entry.Name())
 			subcontainerName := path.Join(containerName, entry.Name())
+
+			klog.Infof("watch directory: entryPath: %v, subcontainerName: %v", entryPath, subcontainerName)
 			alreadyWatchingSubDir, err := w.watchDirectory(events, entryPath, subcontainerName)
 			if err != nil {
 				klog.Infof("Failed to watch directory %q: %v", entryPath, err)
