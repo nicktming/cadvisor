@@ -180,7 +180,6 @@ func (m *manager) getContainersDiff(containerName string) (added []info.Containe
 	return
 }
 
-// 暂时不确定 你说 不一定去厦门啊 到时候看情况 等到工作居住证办下来再说
 func (m *manager) detectSubcontainers(containerName string) error {
 	added, removed, err := m.getContainersDiff(containerName)
 	if err != nil {

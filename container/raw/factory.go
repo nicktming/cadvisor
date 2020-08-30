@@ -9,7 +9,6 @@ import (
 	"k8s.io/klog"
 	watch "github.com/google/cadvisor/watcher"
 	"flag"
-	"strings"
 )
 
 
