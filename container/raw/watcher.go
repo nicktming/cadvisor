@@ -136,7 +136,7 @@ func (w *rawContainerWatcher) watchDirectory(events chan watcher.ContainerEvent,
 			entryPath := path.Join(dir, entry.Name())
 			subcontainerName := path.Join(containerName, entry.Name())
 
-			klog.Infof("watch directory: entryPath: %v, subcontainerName: %v", entryPath, subcontainerName)
+			//klog.Infof("watch directory: entryPath: %v, subcontainerName: %v", entryPath, subcontainerName)
 			alreadyWatchingSubDir, err := w.watchDirectory(events, entryPath, subcontainerName)
 			if err != nil {
 				klog.Infof("Failed to watch directory %q: %v", entryPath, err)
