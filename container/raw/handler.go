@@ -7,6 +7,7 @@ import (
 	"github.com/google/cadvisor/container/libcontainer"
 	"log"
 	info "github.com/google/cadvisor/info/v1"
+	"k8s.io/klog"
 )
 
 type rawContainerHandler struct {
@@ -29,6 +30,59 @@ func isRootCgroup(name string) bool {
 func (h *rawContainerHandler) ListContainers(listType container.ListType) ([]info.ContainerReference, error) {
 	return common.ListContainers(h.name, h.cgroupPaths, listType)
 }
+
+func (h *rawContainerHandler) ContainerReference() (info.ContainerReference, error) {
+	// We only know the container by its one name.
+	return info.ContainerReference{
+		Name: h.name,
+	}, nil
+}
+
+// Nothing to start up.
+func (h *rawContainerHandler) Start() {}
+
+// Nothing to clean up.
+func (h *rawContainerHandler) Cleanup() {}
+
+func (h *rawContainerHandler) GetSpec() (info.ContainerSpec, error) {
+	const hasNetwork = false
+	hasFilesystem := isRootCgroup(h.name) || len(h.externalMounts) > 0
+	// TODO
+	spec, err := common.GetSpec(h.cgroupPaths, hasNetwork, hasFilesystem)
+	if err != nil {
+		return spec, err
+	}
+
+	if isRootCgroup(h.name) {
+		// Check physical network devices for root container.
+		//nd, err := h.GetRootNetworkDevices()
+		//if err != nil {
+		//	return spec, err
+		//}
+		//spec.HasNetwork = spec.HasNetwork || len(nd) != 0
+		//
+		//// Get memory and swap limits of the running machine
+		//memLimit, err := machine.GetMachineMemoryCapacity()
+		//if err != nil {
+		//	klog.Warningf("failed to obtain memory limit for machine container")
+		//	spec.HasMemory = false
+		//} else {
+		//	spec.Memory.Limit = uint64(memLimit)
+		//	// Spec is marked to have memory only if the memory limit is set
+		//	spec.HasMemory = true
+		//}
+		//
+		//swapLimit, err := machine.GetMachineSwapCapacity()
+		//if err != nil {
+		//	klog.Warningf("failed to obtain swap limit for machine container")
+		//} else {
+		//	spec.Memory.SwapLimit = uint64(swapLimit)
+		//}
+	}
+
+	return spec, nil
+}
+
 
 // TODO machineInfoFactory info.MachineInfoFactory
 func newRawContainerHandler(name string, cgroupSubsystems *libcontainer.CgroupSubsystems, fsInfo fs.FsInfo, watcher *common.InotifyWatcher, rootFs string, includedMetrics container.MetricSet) (container.ContainerHandler, error) {

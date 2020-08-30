@@ -15,7 +15,20 @@ import (
 	"time"
 	info "github.com/google/cadvisor/info/v1"
 	"fmt"
+	"github.com/google/cadvisor/events"
+	"strings"
+	"strconv"
+	"flag"
 )
+
+var globalHousekeepingInterval = flag.Duration("global_housekeeping_interval", 1*time.Minute, "Interval between global housekeepings")
+var updateMachineInfoInterval = flag.Duration("update_machine_info_interval", 5*time.Minute, "Interval between machine info updates.")
+var logCadvisorUsage = flag.Bool("log_cadvisor_usage", false, "Whether to log the usage of the cAdvisor container")
+var eventStorageAgeLimit = flag.String("event_storage_age_limit", "default=24h", "Max length of time for which to store events (per type). Value is a comma separated list of key values, where the keys are event types (e.g.: creation, oom) or \"default\" and the value is a duration. Default is applied to all non-specified event types")
+var eventStorageEventLimit = flag.String("event_storage_event_limit", "default=100000", "Max number of events to store (per type). Value is a comma separated list of key values, where the keys are event types (e.g.: creation, oom) or \"default\" and the value is an integer. Default is applied to all non-specified event types")
+var applicationMetricsCountLimit = flag.Int("application_metrics_count_limit", 100, "Max number of application metrics to store (per container)")
+
+
 
 type Manager interface {
 	Start() error
@@ -35,6 +48,7 @@ type manager struct {
 	eventsChannel 		chan watcher.ContainerEvent
 	inHostNamespace          bool
 	memoryCache              *memory.InMemoryCache
+	eventHandler             events.EventManager
 }
 
 func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs) (Manager, error) {
@@ -71,8 +85,56 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs) (Manager, error) 
 		memoryCache: 			memoryCache,
 	}
 
+	newManager.eventHandler = events.NewEventManager(parseEventsStoragePolicy())
 	return newManager, nil
 
+}
+
+// Parses the events StoragePolicy from the flags.
+func parseEventsStoragePolicy() events.StoragePolicy {
+	policy := events.DefaultStoragePolicy()
+
+	// Parse max age.
+	parts := strings.Split(*eventStorageAgeLimit, ",")
+	for _, part := range parts {
+		items := strings.Split(part, "=")
+		if len(items) != 2 {
+			klog.Warningf("Unknown event storage policy %q when parsing max age", part)
+			continue
+		}
+		dur, err := time.ParseDuration(items[1])
+		if err != nil {
+			klog.Warningf("Unable to parse event max age duration %q: %v", items[1], err)
+			continue
+		}
+		if items[0] == "default" {
+			policy.DefaultMaxAge = dur
+			continue
+		}
+		policy.PerTypeMaxAge[info.EventType(items[0])] = dur
+	}
+
+	// Parse max number.
+	parts = strings.Split(*eventStorageEventLimit, ",")
+	for _, part := range parts {
+		items := strings.Split(part, "=")
+		if len(items) != 2 {
+			klog.Warningf("Unknown event storage policy %q when parsing max event limit", part)
+			continue
+		}
+		val, err := strconv.Atoi(items[1])
+		if err != nil {
+			klog.Warningf("Unable to parse integer from %q: %v", items[1], err)
+			continue
+		}
+		if items[0] == "default" {
+			policy.DefaultMaxNumEvents = val
+			continue
+		}
+		policy.PerTypeMaxNumEvents[info.EventType(items[0])] = val
+	}
+
+	return policy
 }
 
 func (m *manager) Start() error {
@@ -113,8 +175,6 @@ func (m *manager) Start() error {
 	if err != nil {
 		return err
 	}
-
-
 	return nil
 }
 
@@ -219,7 +279,6 @@ func (m *manager) detectSubcontainers(containerName string) error {
 	return nil
 }
 
-
 func (m *manager) createContainer(containerName string, watchSource watcher.ContainerWatchSource) error {
 	m.containersLock.Lock()
 	defer m.containersLock.Unlock()
@@ -259,9 +318,29 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 	//klog.Infof("Added container: %q (aliases: %v, namespace: %q)", containerName, cont.info.Aliases, cont.info.Namespace)
 
 	// TODO GetSpec ContainerReference
+	contSpec, err := cont.handler.GetSpec()
+	if err != nil {
+		return err
+	}
+
+	contRef, err := cont.handler.ContainerReference()
+	if err != nil {
+		return err
+	}
+
+	newEvent := &info.Event{
+		ContainerName: contRef.Name,
+		Timestamp:     contSpec.CreationTime,
+		EventType:     info.EventContainerCreation,
+	}
+	err = m.eventHandler.AddEvent(newEvent)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
+
 
 
 
