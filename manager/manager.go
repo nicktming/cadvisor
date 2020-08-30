@@ -95,6 +95,18 @@ func (m *manager) Start() error {
 	}
 
 	// TODO create quit channels
+	// Create root and then recover all containers.
+	err = m.createContainer("/", watcher.Raw)
+	if err != nil {
+		return err
+	}
+	klog.V(2).Infof("Starting recovery of all containers")
+	err = m.detectSubcontainers("/")
+	if err != nil {
+		return err
+	}
+	klog.V(2).Infof("Recovery completed")
+
 
 	quitWatcher := make(chan error)
 	err = m.watchForNewContainers(quitWatcher)
