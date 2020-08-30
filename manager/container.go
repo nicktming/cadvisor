@@ -26,9 +26,9 @@ type containerData struct {
 
 // TODO collectorManager collector.CollectorManager
 func newContainerData(containerName string, memoryCache *memory.InMemoryCache, handler container.ContainerHandler, logUsage bool, maxHousekeepingInterval time.Duration, allowDynamicHousekeeping bool, clock clock.Clock) (*containerData, error) {
-	if memoryCache == nil {
-		return nil, fmt.Errorf("nil memory storage")
-	}
+	//if memoryCache == nil {
+	//	return nil, fmt.Errorf("nil memory storage")
+	//}
 	if handler == nil {
 		return nil, fmt.Errorf("nil container handler")
 	}
@@ -39,7 +39,7 @@ func newContainerData(containerName string, memoryCache *memory.InMemoryCache, h
 
 	cont := &containerData{
 		handler:                  handler,
-		//memoryCache:              memoryCache,
+		memoryCache:              memoryCache,
 		//housekeepingInterval:     *HousekeepingInterval,
 		//maxHousekeepingInterval:  maxHousekeepingInterval,
 		//allowDynamicHousekeeping: allowDynamicHousekeeping,
