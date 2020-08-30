@@ -220,7 +220,7 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 		Name: 		containerName,
 	}
 
-	if _, ok := m.containers[containerName]; ok {
+	if _, ok := m.containers[namespacedName]; ok {
 		return nil
 	}
 
@@ -236,7 +236,7 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 
 	// TODO logUsage collectManager
 	logUsage := false
-	cont, err := newContainerData(containerName, m.memoryCache, handler, logUsage, 5 * time.Second, 10 * time.Second, clock.RealClock{})
+	cont, err := newContainerData(containerName, m.memoryCache, handler, logUsage, 5 * time.Second, false, clock.RealClock{})
 	if err != nil {
 		return err
 	}
