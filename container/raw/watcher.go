@@ -11,7 +11,6 @@ import (
 	"path"
 	"os"
 	inotify "k8s.io/utils/inotify"
-	"log"
 )
 
 type rawContainerWatcher struct {
@@ -61,11 +60,21 @@ func NewRawContainerWatcher() (watcher.ContainerWatcher, error) {
 
 func (w *rawContainerWatcher) Start(events chan watcher.ContainerEvent) error {
 	// TODO .mount
+
+	watched := make([]string, 0)
+
 	for _, cgroupPath := range w.cgroupPaths {
 		_, err := w.watchDirectory(events, cgroupPath, "/")
 		if err != nil {
+			for _, watchedCgroupPath := range watched {
+				_, err := w.watcher.RemoveWatch("/", watchedCgroupPath)
+				if err != nil {
+					klog.Warningf("Failed to remove inotify watch for %q: %v", watchedCgroupPath, err)
+				}
+			}
 			return err
 		}
+		watched = append(watched, cgroupPath)
 	}
 
 	// TODO removeDirectory watch
@@ -90,7 +99,7 @@ func (w *rawContainerWatcher) Start(events chan watcher.ContainerEvent) error {
 			}
 		}
 	}()
-	return nil 
+	return nil
 }
 
 func (w *rawContainerWatcher) Stop() error {

@@ -23,3 +23,4 @@ func main() {
 
 // TODO
 // 1. watch raw removeWatchDirectory
+// 2. MakeCgroupPaths no need to use /
