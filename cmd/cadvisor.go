@@ -4,6 +4,8 @@ import (
 	"github.com/google/cadvisor/manager"
 	"github.com/google/cadvisor/utils/sysfs"
 	"k8s.io/klog"
+	"github.com/google/cadvisor/events"
+	info "github.com/google/cadvisor/info/v1"
 )
 
 func main() {
@@ -19,6 +21,15 @@ func main() {
 	if err := resourceManager.Start(); err != nil {
 		klog.Fatal("Failed to start manager: %v", err)
 	}
+
+	req := events.NewRequest()
+	req.EventType[info.EventContainerCreation] = true
+
+	ec, err := resourceManager.WatchForEvents(req)
+	for _, event := range ec.GetChannel() {
+		klog.Infof("event containerName: %v, type: %v", event.ContainerName, event.EventType)
+	}
+
 }
 
 // TODO

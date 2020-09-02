@@ -32,6 +32,15 @@ var applicationMetricsCountLimit = flag.Int("application_metrics_count_limit", 1
 
 type Manager interface {
 	Start() error
+
+	CloseEventChannel(watchID int)
+
+	// Get events streamed through passedChannel that fit the request.
+	WatchForEvents(request *events.Request) (*events.EventChannel, error)
+
+	// Get past events that have been detected and that fit the request.
+	GetPastEvents(request *events.Request) ([]*info.Event, error)
+
 }
 
 type namespacedContainerName struct {
@@ -340,6 +349,21 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 
 	return nil
 }
+
+func (m *manager) WatchForEvents(request *events.Request) (*events.EventChannel, error) {
+	return m.eventHandler.WatchEvents(request)
+}
+
+// can be called by the api which will return all events satisfying the request
+func (m *manager) GetPastEvents(request *events.Request) ([]*info.Event, error) {
+	return m.eventHandler.GetEvents(request)
+}
+
+// called by the api when a client is no longer listening to the channel
+func (m *manager) CloseEventChannel(watchID int) {
+	m.eventHandler.StopWatch(watchID)
+}
+
 
 
 

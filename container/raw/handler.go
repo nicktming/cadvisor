@@ -48,6 +48,7 @@ func (h *rawContainerHandler) GetSpec() (info.ContainerSpec, error) {
 	const hasNetwork = false
 	hasFilesystem := isRootCgroup(h.name) || len(h.externalMounts) > 0
 	// TODO
+	klog.Infof("rawContainerHandler h.cgroupPaths: %v", h.cgroupPaths)
 	spec, err := common.GetSpec(h.cgroupPaths, hasNetwork, hasFilesystem)
 	if err != nil {
 		return spec, err

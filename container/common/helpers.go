@@ -96,6 +96,7 @@ func GetSpec(cgroupPaths map[string]string, hasNetwork, hasFilesystem bool) (inf
 		// eg. /docker will have creation time matching the creation of latest docker container.
 		// Use clone_children as a workaround as it isn't usually modified. It is only likely changed
 		// immediately after creating a container.
+
 		cgroupPath = path.Join(cgroupPath, "cgroup.clone_children")
 		fi, err := os.Stat(cgroupPath)
 		if err == nil && fi.ModTime().Before(lowestTime) {
