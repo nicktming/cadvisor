@@ -26,8 +26,11 @@ func main() {
 	req.EventType[info.EventContainerCreation] = true
 
 	ec, err := resourceManager.WatchForEvents(req)
-	for _, event := range ec.GetChannel() {
-		klog.Infof("event containerName: %v, type: %v", event.ContainerName, event.EventType)
+	for  {
+		select {
+		case event := <- ec.GetChannel():
+			klog.Infof("event containerName: %v, type: %v", event.ContainerName, event.EventType)
+		}
 	}
 
 }
