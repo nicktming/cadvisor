@@ -168,10 +168,10 @@ func (m *manager) Start() error {
 
 	// TODO create quit channels
 	// Create root and then recover all containers.
-	err = m.createContainer("/", watcher.Raw)
-	if err != nil {
-		return err
-	}
+	//err = m.createContainer("/", watcher.Raw)
+	//if err != nil {
+	//	return err
+	//}
 	klog.Infof("Starting recovery of all containers")
 	//err = m.detectSubcontainers("/")
 	//if err != nil {
@@ -204,10 +204,10 @@ func (m *manager) watchForNewContainers(quit chan error) error {
 	// TODO watcher stop
 
 	// There is a race between starting the watch and new container creation so we do a detection before we read new containers.
-	err := m.detectSubcontainers("/")
-	if err != nil {
-		return err
-	}
+	//err := m.detectSubcontainers("/")
+	//if err != nil {
+	//	return err
+	//}
 
 
 	go func(){
