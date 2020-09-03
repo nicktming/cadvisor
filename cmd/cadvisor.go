@@ -17,15 +17,16 @@ func main() {
 	if err != nil {
 		klog.Infof("Failed to create a manager: %s", err)
 	}
+	req := events.NewRequest()
+	req.EventType[info.EventContainerCreation] = true
+
+	ec, err := resourceManager.WatchForEvents(req)
 
 	if err := resourceManager.Start(); err != nil {
 		klog.Fatal("Failed to start manager: %v", err)
 	}
 
-	req := events.NewRequest()
-	req.EventType[info.EventContainerCreation] = true
 
-	ec, err := resourceManager.WatchForEvents(req)
 	klog.Infof("====>got watcher Id: %v", ec.GetWatchId())
 	for  {
 		select {
