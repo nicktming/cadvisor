@@ -209,6 +209,41 @@ func (m *manager) watchForNewContainers(quit chan error) error {
 		return err
 	}
 
+
+	go func(){
+		for {
+			select {
+			case event := <-m.eventsChannel:
+				switch {
+				case event.EventType == watcher.ContainerAdd:
+					// TODO create container
+					klog.Infof("watchForNewContainers (watcher.ContainerAdd) event name: %v, watchSource: %v", event.Name, event.WatchSource)
+
+				case event.EventType == watcher.ContainerDelete:
+					klog.Infof("watchForNewContainers (watcher.ContainerDelete) event name: %v, watchSource: %v", event.Name, event.WatchSource)
+				}
+
+			case <-quit:
+				var errs partialFailure
+
+				for i, watcher := range m.containerWatchers {
+					err := watcher.Stop()
+					if err != nil {
+						errs.append(fmt.Sprintf("watcher %d", i), "Stop", err)
+					}
+				}
+
+				if len(errs) > 0 {
+					quit <- errs
+				} else {
+					quit <- nil
+					klog.Infof("Exiting thread watching subcontainers")
+					return
+				}
+			}
+		}
+	}()
+
 	return nil
 }
 
@@ -369,11 +404,22 @@ func (m *manager) CloseEventChannel(watchID int) {
 	m.eventHandler.StopWatch(watchID)
 }
 
+type partialFailure []string
 
+func (f *partialFailure) append(id, operation string, err error) {
+	*f = append(*f, fmt.Sprintf("[%q: %s: %s]", id, operation, err))
+}
 
+func (f *partialFailure) Error() string {
+	return fmt.Sprintf("partial failures: %s", strings.Join(f, ", "))
+}
 
-
-
+func (f partialFailure) OrNil() error {
+	if len(f) == 0 {
+		return nil
+	}
+	return f
+}
 
 
 
