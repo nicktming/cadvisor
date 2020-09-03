@@ -310,7 +310,7 @@ func (e *events) AddEvent(event *info.Event) error {
 	for _, watchObject := range watchesToSend {
 		watchObject.eventChannel.GetChannel() <- event
 	}
-	klog.V(4).Infof("Added event %v", event)
+	klog.Infof("++++++Added event %v", event)
 	return nil
 }
 

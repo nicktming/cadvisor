@@ -171,7 +171,7 @@ func (m *manager) Start() error {
 	if err != nil {
 		return err
 	}
-	klog.V(2).Infof("Starting recovery of all containers")
+	klog.Infof("Starting recovery of all containers")
 	//err = m.detectSubcontainers("/")
 	//if err != nil {
 	//	return err
@@ -262,28 +262,29 @@ func (m *manager) getContainersDiff(containerName string) (added []info.Containe
 }
 
 func (m *manager) detectSubcontainers(containerName string) error {
-	added, removed, err := m.getContainersDiff(containerName)
+	_, _, err := m.getContainersDiff(containerName)
+	//added, removed, err := m.getContainersDiff(containerName)
 	if err != nil {
 		return err
 	}
 
 	// Add the new containers.
-	for _, cont := range added {
-		klog.Infof("Add container name: %v", cont.Name)
+	//for _, cont := range added {
+		//klog.Infof("Add container name: %v", cont.Name)
 		//err = m.createContainer(cont.Name, watcher.Raw)
 		//if err != nil {
 		//	klog.Errorf("Failed to create existing container: %s: %s", cont.Name, err)
 		//}
-	}
+	//}
 
 	// Remove the old containers.
-	for _, cont := range removed {
-		klog.Infof("Remove container name: %v", cont.Name)
+	//for _, cont := range removed {
+	//	klog.Infof("Remove container name: %v", cont.Name)
 		//err = m.destroyContainer(cont.Name)
 		//if err != nil {
 		//	klog.Errorf("Failed to destroy existing container: %s: %s", cont.Name, err)
 		//}
-	}
+	//}
 
 	return nil
 }

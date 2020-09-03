@@ -26,6 +26,7 @@ func main() {
 	req.EventType[info.EventContainerCreation] = true
 
 	ec, err := resourceManager.WatchForEvents(req)
+	klog.Infof("====>got watcher Id: %v", ec.GetWatchId())
 	for  {
 		select {
 		case event := <- ec.GetChannel():
