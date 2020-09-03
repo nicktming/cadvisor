@@ -172,11 +172,11 @@ func (m *manager) Start() error {
 		return err
 	}
 	klog.V(2).Infof("Starting recovery of all containers")
-	err = m.detectSubcontainers("/")
-	if err != nil {
-		return err
-	}
-	klog.V(2).Infof("Recovery completed")
+	//err = m.detectSubcontainers("/")
+	//if err != nil {
+	//	return err
+	//}
+	//klog.V(2).Infof("Recovery completed")
 
 
 	quitWatcher := make(chan error)
