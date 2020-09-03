@@ -410,7 +410,7 @@ func (f *partialFailure) append(id, operation string, err error) {
 	*f = append(*f, fmt.Sprintf("[%q: %s: %s]", id, operation, err))
 }
 
-func (f *partialFailure) Error() string {
+func (f partialFailure) Error() string {
 	return fmt.Sprintf("partial failures: %s", strings.Join(f, ", "))
 }
 
