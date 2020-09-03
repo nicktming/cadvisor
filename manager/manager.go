@@ -19,6 +19,7 @@ import (
 	"strings"
 	"strconv"
 	"flag"
+	"encoding/json"
 )
 
 var globalHousekeepingInterval = flag.Duration("global_housekeeping_interval", 1*time.Minute, "Interval between global housekeepings")
@@ -332,6 +333,9 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 	if err != nil {
 		return err
 	}
+
+	pretty_contSpec, _ := json.MarshalIndent(contSpec, "", "\t")
+	klog.Infof("+++++++++++++++++contSpec: %v", string(pretty_contSpec))
 
 	contRef, err := cont.handler.ContainerReference()
 	if err != nil {
