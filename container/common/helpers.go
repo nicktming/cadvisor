@@ -252,3 +252,15 @@ func readUInt64(dirpath string, file string) uint64 {
 
 	return val
 }
+
+func CgroupExists(cgroupPaths map[string]string) bool {
+	// If any cgroup exists, the container is still alive.
+	for _, cgroupPath := range cgroupPaths {
+		if utils.FileExists(cgroupPath) {
+			return true
+		}
+	}
+	return false
+}
+
+

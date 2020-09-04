@@ -18,8 +18,103 @@ type ContainerReference struct {
 	Namespace string `json:"namespace,omitempty"`
 }
 
+// CPU usage time statistics.
+type CpuUsage struct {
+	// Total CPU usage.
+	// Unit: nanoseconds.
+	Total uint64 `json:"total"`
+
+	// Per CPU/core usage of the container.
+	// Unit: nanoseconds.
+	PerCpu []uint64 `json:"per_cpu_usage,omitempty"`
+
+	// Time spent in user space.
+	// Unit: nanoseconds.
+	User uint64 `json:"user"`
+
+	// Time spent in kernel space.
+	// Unit: nanoseconds.
+	System uint64 `json:"system"`
+}
+
+// Cpu Completely Fair Scheduler statistics.
+type CpuCFS struct {
+	// Total number of elapsed enforcement intervals.
+	Periods uint64 `json:"periods"`
+
+	// Total number of times tasks in the cgroup have been throttled.
+	ThrottledPeriods uint64 `json:"throttled_periods"`
+
+	// Total time duration for which tasks in the cgroup have been throttled.
+	// Unit: nanoseconds.
+	ThrottledTime uint64 `json:"throttled_time"`
+}
+
+// All CPU usage metrics are cumulative from the creation of the container
+type CpuStats struct {
+	Usage     CpuUsage     `json:"usage"`
+	CFS       CpuCFS       `json:"cfs"`
+	Schedstat CpuSchedstat `json:"schedstat"`
+	// Smoothed average of number of runnable threads x 1000.
+	// We multiply by thousand to avoid using floats, but preserving precision.
+	// Load is smoothed over the last 10 seconds. Instantaneous value can be read
+	// from LoadStats.NrRunning.
+	LoadAverage int32 `json:"load_average"`
+}
+
+type MemoryStats struct {
+	// Current memory usage, this includes all memory regardless of when it was
+	// accessed.
+	// Units: Bytes.
+	Usage uint64 `json:"usage"`
+
+	// Maximum memory usage recorded.
+	// Units: Bytes.
+	MaxUsage uint64 `json:"max_usage"`
+
+	// Number of bytes of page cache memory.
+	// Units: Bytes.
+	Cache uint64 `json:"cache"`
+
+	// The amount of anonymous and swap cache memory (includes transparent
+	// hugepages).
+	// Units: Bytes.
+	RSS uint64 `json:"rss"`
+
+	// The amount of swap currently used by the processes in this cgroup
+	// Units: Bytes.
+	Swap uint64 `json:"swap"`
+
+	// The amount of memory used for mapped files (includes tmpfs/shmem)
+	MappedFile uint64 `json:"mapped_file"`
+
+	// The amount of working set memory, this includes recently accessed memory,
+	// dirty memory, and kernel memory. Working set is <= "usage".
+	// Units: Bytes.
+	WorkingSet uint64 `json:"working_set"`
+
+	Failcnt uint64 `json:"failcnt"`
+
+	ContainerData    MemoryStatsMemoryData `json:"container_data,omitempty"`
+	HierarchicalData MemoryStatsMemoryData `json:"hierarchical_data,omitempty"`
+}
+
+type MemoryNumaStats struct {
+	File        map[uint8]uint64 `json:"file,omitempty"`
+	Anon        map[uint8]uint64 `json:"anon,omitempty"`
+	Unevictable map[uint8]uint64 `json:"unevictable,omitempty"`
+}
+
+type MemoryStatsMemoryData struct {
+	Pgfault    uint64          `json:"pgfault"`
+	Pgmajfault uint64          `json:"pgmajfault"`
+	NumaStats  MemoryNumaStats `json:"numa_stats,omitempty"`
+}
+
 type ContainerStats struct {
 	Timestamp time.Time               `json:"timestamp"`
+	Cpu       CpuStats                `json:"cpu,omitempty"`
+	Memory    MemoryStats             `json:"memory,omitempty"`
 }
 
 // Cpu Aggregated scheduler statistics
@@ -136,4 +231,17 @@ type OomKillEventData struct {
 
 	// The name of the killed process
 	ProcessName string `json:"process_name"`
+}
+
+type ContainerInfo struct {
+	ContainerReference
+
+	// The direct subcontainers of the current container.
+	Subcontainers []ContainerReference `json:"subcontainers,omitempty"`
+
+	// The isolation used in the container.
+	Spec ContainerSpec `json:"spec,omitempty"`
+
+	// Historical statistics gathered from the container.
+	Stats []*ContainerStats `json:"stats,omitempty"`
 }

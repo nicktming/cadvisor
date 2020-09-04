@@ -387,7 +387,7 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 		return err
 	}
 
-	return nil
+	return cont.Start()
 }
 
 func (m *manager) WatchForEvents(request *events.Request) (*events.EventChannel, error) {

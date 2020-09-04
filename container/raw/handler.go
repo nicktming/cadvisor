@@ -31,6 +31,10 @@ func (h *rawContainerHandler) ListContainers(listType container.ListType) ([]inf
 	return common.ListContainers(h.name, h.cgroupPaths, listType)
 }
 
+func (h *rawContainerHandler) Exists() bool {
+	return common.CgroupExists(h.cgroupPaths)
+}
+
 func (h *rawContainerHandler) ContainerReference() (info.ContainerReference, error) {
 	// We only know the container by its one name.
 	return info.ContainerReference{
