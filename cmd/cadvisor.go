@@ -6,6 +6,7 @@ import (
 	"k8s.io/klog"
 	"github.com/google/cadvisor/events"
 	info "github.com/google/cadvisor/info/v1"
+	"encoding/json"
 )
 
 func main() {
@@ -26,14 +27,29 @@ func main() {
 		klog.Fatal("Failed to start manager: %v", err)
 	}
 
-
+	stop := make(chan struct{})
 	klog.Infof("====>got watcher Id: %v", ec.GetWatchId())
-	for  {
-		select {
-		case event := <- ec.GetChannel():
-			klog.Infof("event containerName: %v, type: %v", event.ContainerName, event.EventType)
+	go func() {
+		for  {
+			select {
+			case event := <- ec.GetChannel():
+				klog.Infof("+++++++++++++++event containerName: %v, type: %v", event.ContainerName, event.EventType)
+			}
 		}
+	}()
+
+	cinfo, err := resourceManager.GetContainerInfo("/", info.DefaultContainerInfoRequest())
+	if err != nil {
+		panic(err)
 	}
+
+	klog.Infof("cinfo: %v/%v", cinfo.Namespace, cinfo.Name)
+
+	pretty_cinfo, _ := json.MarshalIndent(cinfo, "", "\t")
+
+	klog.Infof("pretty cinfo: %v", string(pretty_cinfo))
+
+	<- stop
 
 }
 

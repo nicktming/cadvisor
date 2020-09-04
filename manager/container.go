@@ -11,6 +11,7 @@ import (
 	"flag"
 	"k8s.io/klog"
 	units "github.com/docker/go-units"
+	"sort"
 )
 
 var enableLoadReader = flag.Bool("enable_load_reader", false, "Whether to enable cpu load reader")
@@ -46,6 +47,7 @@ type containerData struct {
 	clock clock.Clock
 
 	statsLastUpdatedTime     time.Time
+	infoLastUpdatedTime      time.Time
 
 
 }
@@ -267,3 +269,137 @@ func (cd *containerData) updateStats() error {
 
 	return err
 }
+
+func (cd *containerData) GetInfo(shouldUpdateSubcontainers bool) (*containerInfo, error) {
+	if cd.clock.Since(cd.infoLastUpdatedTime) > 5 * time.Second || shouldUpdateSubcontainers {
+		err := cd.updateSpec()
+		if err != nil {
+			return nil, err
+		}
+		if shouldUpdateSubcontainers {
+			err = cd.updateSubcontainers()
+			if err != nil {
+				return nil, err
+			}
+		}
+		cd.infoLastUpdatedTime = cd.clock.Now()
+	}
+	cd.lock.Lock()
+	defer cd.lock.Unlock()
+	cInfo := containerInfo{
+		Subcontainers: 		cd.info.Subcontainers,
+		Spec:			cd.info.Spec,
+	}
+	cInfo.Id = cd.info.Id
+	cInfo.Name = cd.info.Name
+	cInfo.Aliases = cd.info.Aliases
+	cInfo.Namespace = cd.info.Namespace
+	return &cInfo, nil
+}
+
+func (cd *containerData) updateSubcontainers() error {
+	var subcontainers info.ContainerReferenceSlice
+	subcontainers, err := cd.handler.ListContainers(container.ListSelf)
+	if err != nil {
+		// Ignore errors if the container is dead.
+		if !cd.handler.Exists() {
+			return nil
+		}
+		return err
+	}
+	sort.Sort(subcontainers)
+	cd.lock.Lock()
+	defer cd.lock.Unlock()
+	cd.info.Subcontainers = subcontainers
+	return nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

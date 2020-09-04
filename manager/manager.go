@@ -32,6 +32,7 @@ var applicationMetricsCountLimit = flag.Int("application_metrics_count_limit", 1
 
 
 type Manager interface {
+
 	Start() error
 
 	CloseEventChannel(watchID int)
@@ -41,6 +42,8 @@ type Manager interface {
 
 	// Get past events that have been detected and that fit the request.
 	GetPastEvents(request *events.Request) ([]*info.Event, error)
+
+	GetContainerInfo(containerName string, query *info.ContainerInfo) (*info.ContainerInfo, error)
 
 }
 
@@ -168,10 +171,10 @@ func (m *manager) Start() error {
 
 	// TODO create quit channels
 	// Create root and then recover all containers.
-	//err = m.createContainer("/", watcher.Raw)
-	//if err != nil {
-	//	return err
-	//}
+	err = m.createContainer("/", watcher.Raw)
+	if err != nil {
+		return err
+	}
 	klog.Infof("Starting recovery of all containers")
 	//err = m.detectSubcontainers("/")
 	//if err != nil {
@@ -389,6 +392,62 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 
 	return cont.Start()
 }
+
+func (m *manager) GetContainerInfo(containerName string, query *info.ContainerInfo) (*info.ContainerInfo, error) {
+	cont, err := m.getContainerData(containerName)
+	if err != nil {
+		return nil, err
+	}
+	return m.containerDataToContainerInfo(cont, query)
+}
+
+func (m *manager) containerDataToContainerInfo(cont *containerData, query *info.ContainerInfoRequest) (*info.ContainerInfo, error) {
+	cinfo, err := cont.GetInfo(true)
+	if err != nil {
+		return nil, err
+	}
+	stats, err := m.memoryCache.RecentStats(cinfo.Name, query.Start, query.End, query.NumStats)
+	if err != nil {
+		return nil, err
+	}
+	ret := &info.ContainerInfo{
+		ContainerReference: 	cinfo.ContainerReference,
+		Subcontainers: 		cinfo.Subcontainers,
+		Spec:			m.getAdjustedSpec(cinfo),
+		Stats:			stats,
+	}
+	return ret, nil
+}
+
+func (m *manager) getAdjustedSpec(cinfo *containerInfo) info.ContainerSpec {
+	spec := cinfo.Spec
+
+	if spec.HasMemory {
+		if spec.Memory.Limit == 0 {
+			klog.Infof("set memory limit since spec.Memory.Limit = 0")
+		}
+	}
+	return spec
+}
+
+func (m *manager) getContainerData(containerName string) (*containerData, error) {
+	var cont *containerData
+	var ok bool
+	func() {
+		m.containersLock.RLock()
+		defer m.containersLock.RUnlock()
+
+		cont, ok = m.containers[namespacedContainerName{
+			Name: containerName,
+		}]
+	}()
+
+	if !ok {
+		return nil, fmt.Errorf("unknow container %q", containerName)
+	}
+	return cont, nil
+}
+
 
 func (m *manager) WatchForEvents(request *events.Request) (*events.EventChannel, error) {
 	return m.eventHandler.WatchEvents(request)
