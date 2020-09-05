@@ -263,6 +263,8 @@ func (cd *containerData) updateStats() error {
 		ContainerReference: ref,
 	}
 
+	klog.Infof("======>update stats")
+
 	err = cd.memoryCache.AddStats(&cInfo, stats)
 
 	// TODO a lot of error

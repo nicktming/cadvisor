@@ -7,6 +7,7 @@ import (
 	"github.com/google/cadvisor/events"
 	info "github.com/google/cadvisor/info/v1"
 	"encoding/json"
+	"time"
 )
 
 func main() {
@@ -42,6 +43,8 @@ func main() {
 			}
 		}
 	}()
+
+	time.Sleep(5 * time.Second)
 
 	request := info.DefaultContainerInfoRequest()
 
