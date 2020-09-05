@@ -43,7 +43,7 @@ type Manager interface {
 	// Get past events that have been detected and that fit the request.
 	GetPastEvents(request *events.Request) ([]*info.Event, error)
 
-	GetContainerInfo(containerName string, query *info.ContainerInfo) (*info.ContainerInfo, error)
+	GetContainerInfo(containerName string, query *info.ContainerInfoRequest) (*info.ContainerInfo, error)
 
 }
 
