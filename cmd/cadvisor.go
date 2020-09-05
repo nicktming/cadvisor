@@ -13,7 +13,12 @@ func main() {
 
 	sysFs := sysfs.NewRealSysFs()
 
-	resourceManager, err := manager.New(nil, sysFs)
+	memoryStorage, err := NewMemoryStorage()
+	if err != nil {
+		panic(err)
+	}
+
+	resourceManager, err := manager.New(memoryStorage, sysFs)
 
 	if err != nil {
 		klog.Infof("Failed to create a manager: %s", err)
