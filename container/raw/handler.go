@@ -149,8 +149,6 @@ func (h *rawContainerHandler) GetStats() (*info.ContainerStats, error) {
 	//	return stats, err
 	//}
 
-	//return stats, nil
-
-	return nil, nil
+	return stats, nil
 }
 
