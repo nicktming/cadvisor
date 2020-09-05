@@ -219,7 +219,7 @@ func (m *manager) watchForNewOoms() error {
 			if err != nil {
 				klog.Errorf("failed to add OOM event for %q: %v", oomInstance.ContainerName, err)
 			}
-	
+
 			klog.Infof("Created an OOM event in container %q at %v", oomInstance.ContainerName, oomInstance.TimeOfDeath)
 
 			newEvent = &info.Event{

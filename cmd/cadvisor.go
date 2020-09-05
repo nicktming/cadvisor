@@ -37,6 +37,9 @@ func main() {
 	}
 	req := events.NewRequest()
 	req.EventType[info.EventContainerCreation] = true
+	req.EventType[info.EventContainerDeletion] = true
+	req.EventType[info.EventOom] = true
+	req.EventType[info.EventOomKill] = true 
 
 	ec, err := resourceManager.WatchForEvents(req)
 
