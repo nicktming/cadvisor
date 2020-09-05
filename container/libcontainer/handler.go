@@ -5,6 +5,7 @@ import (
 	"github.com/opencontainers/runc/libcontainer"
 	"github.com/google/cadvisor/container"
 	info "github.com/google/cadvisor/info/v1"
+	"golang.org/x/sys/unix"
 	"time"
 	"k8s.io/klog"
 	"path"
@@ -168,6 +169,17 @@ func setInterfaceStatValues(fields []string, pointers []*uint64) error {
 	return nil
 }
 
+func getNumberOnlineCPUs() (uint32, error) {
+	var availableCPUs unix.CPUSet
+	if err := unix.SchedGetaffinity(0, &availableCPUs); err != nil {
+		return 0, err
+	}
+	return uint32(availableCPUs.Count()), nil
+}
+
+// var to allow unit tests to stub it out
+var numCpusFunc = getNumberOnlineCPUs
+
 // Convert libcontainer stats to info.ContainerStats.
 func setCPUStats(s *cgroups.Stats, ret *info.ContainerStats, withPerCPU bool) {
 	ret.Cpu.Usage.User = s.CpuStats.CpuUsage.UsageInUsermode
@@ -208,6 +220,22 @@ func setCPUStats(s *cgroups.Stats, ret *info.ContainerStats, withPerCPU bool) {
 		ret.Cpu.Usage.PerCpu[i] = s.CpuStats.CpuUsage.PercpuUsage[i]
 	}
 
+}
+
+
+func (h *Handler) GetProcesses() ([]int, error) {
+	pids, err := h.cgroupManager.GetPids()
+	if err != nil {
+		return nil, err
+	}
+	return pids, nil
+}
+
+func minUint32(x, y uint32) uint32 {
+	if x < y {
+		return x
+	}
+	return y
 }
 
 func setDiskIoStats(s *cgroups.Stats, ret *info.ContainerStats) {
