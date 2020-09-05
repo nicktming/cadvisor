@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"flag"
 	"encoding/json"
+	"github.com/google/cadvisor/utils/oomparser"
 )
 
 var globalHousekeepingInterval = flag.Duration("global_housekeeping_interval", 1*time.Minute, "Interval between global housekeepings")
@@ -165,6 +166,11 @@ func (m *manager) Start() error {
 	}
 	m.containerWatchers = append(m.containerWatchers, rawWatcher)
 
+	err = m.watchForNewOoms()
+	if err != nil {
+		klog.Warningf("Could not configure a source for OOM detection, disabling OOM events: %v", err)
+	}
+
 	if !container.HasFactories() {
 		klog.Infof("there is no factory and exit")
 		return nil
@@ -189,6 +195,50 @@ func (m *manager) Start() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (m *manager) watchForNewOoms() error {
+	klog.Infof("Started watching for new ooms in manager")
+	outStream := make(chan *oomparser.OomInstance, 10)
+	oomLog, err := oomparser.New()
+	if err != nil {
+		return err
+	}
+	go oomLog.StreamOoms(outStream)
+	go func() {
+		for oomInstance := range outStream {
+
+			newEvent := &info.Event{
+				ContainerName: 		oomInstance.ContainerName,
+				Timestamp: 		oomInstance.TimeOfDeath,
+				EventType: 		info.EventOom,
+			}
+
+			err := m.eventHandler.AddEvent(newEvent)
+			if err != nil {
+				klog.Errorf("failed to add OOM event for %q: %v", oomInstance.ContainerName, err)
+			}
+	
+			klog.Infof("Created an OOM event in container %q at %v", oomInstance.ContainerName, oomInstance.TimeOfDeath)
+
+			newEvent = &info.Event{
+				ContainerName: 		oomInstance.VictimContainerName,
+				Timestamp: 		oomInstance.TimeOfDeath,
+				EventType: 		info.EventOomKill,
+				EventData: 		info.EventData{
+					OomKill: &info.OomKillEventData{
+						Pid: 		oomInstance.Pid,
+						ProcessName: 	oomInstance.ProcessName,
+					},
+				},
+			}
+			err = m.eventHandler.AddEvent(newEvent)
+			if err != nil {
+				klog.Infof("failed to add OOM kill event for %q: %v", oomInstance.ContainerName, err)
+			}
+		}
+	}()
 	return nil
 }
 
