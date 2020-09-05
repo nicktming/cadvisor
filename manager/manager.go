@@ -393,7 +393,7 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 	return cont.Start()
 }
 
-func (m *manager) GetContainerInfo(containerName string, query *info.ContainerInfo) (*info.ContainerInfo, error) {
+func (m *manager) GetContainerInfo(containerName string, query *info.ContainerInfoRequest) (*info.ContainerInfo, error) {
 	cont, err := m.getContainerData(containerName)
 	if err != nil {
 		return nil, err
