@@ -307,6 +307,7 @@ func (e *events) AddEvent(event *info.Event) error {
 	e.watcherLock.RLock()
 	defer e.watcherLock.RUnlock()
 	watchesToSend := e.findValidWatchers(event)
+	klog.Infof("-------watcchesToSend: %v", len(watchesToSend))
 	for _, watchObject := range watchesToSend {
 		watchObject.eventChannel.GetChannel() <- event
 	}
