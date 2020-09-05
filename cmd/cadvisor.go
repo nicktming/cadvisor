@@ -38,9 +38,9 @@ func main() {
 		}
 	}()
 
-	req := info.DefaultContainerInfoRequest()
+	request := info.DefaultContainerInfoRequest()
 
-	cinfo, err := resourceManager.GetContainerInfo("/", &req)
+	cinfo, err := resourceManager.GetContainerInfo("/", &request)
 	if err != nil {
 		panic(err)
 	}
