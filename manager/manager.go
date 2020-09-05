@@ -64,7 +64,7 @@ type manager struct {
 	eventHandler             events.EventManager
 }
 
-func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs) (Manager, error) {
+func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, includedMetricsSet container.MetricSet) (Manager, error) {
 	//if memoryCache == nil {
 	//	return nil, fmt.Errorf("manager requires memory storage")
 	//}
@@ -96,6 +96,7 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs) (Manager, error) 
 		eventsChannel: 			eventsChannel,
 		inHostNamespace: 		inHostNamespace,
 		memoryCache: 			memoryCache,
+		includedMetrics: 		includedMetricsSet,
 	}
 
 	newManager.eventHandler = events.NewEventManager(parseEventsStoragePolicy())

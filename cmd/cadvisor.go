@@ -8,6 +8,7 @@ import (
 	info "github.com/google/cadvisor/info/v1"
 	"encoding/json"
 	"time"
+	cadvisormetrics "github.com/google/cadvisor/container"
 )
 
 func main() {
@@ -19,7 +20,17 @@ func main() {
 		panic(err)
 	}
 
-	resourceManager, err := manager.New(memoryStorage, sysFs)
+	includedMetrics := cadvisormetrics.MetricSet {
+		cadvisormetrics.CpuUsageMetrics:         struct{}{},
+		cadvisormetrics.MemoryUsageMetrics:      struct{}{},
+		cadvisormetrics.CpuLoadMetrics:          struct{}{},
+		cadvisormetrics.DiskIOMetrics:           struct{}{},
+		cadvisormetrics.NetworkUsageMetrics:     struct{}{},
+		cadvisormetrics.AcceleratorUsageMetrics: struct{}{},
+		cadvisormetrics.AppMetrics:              struct{}{},
+	}
+
+	resourceManager, err := manager.New(memoryStorage, sysFs, includedMetrics)
 
 	if err != nil {
 		klog.Infof("Failed to create a manager: %s", err)
@@ -67,3 +78,7 @@ func main() {
 // TODO
 // 1. watch raw removeWatchDirectory
 // 2. MakeCgroupPaths no need to use /
+// 3. watch oom
+// 4. memory workingset
+
+

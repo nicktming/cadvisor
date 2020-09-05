@@ -9,6 +9,8 @@ import (
 	fs "github.com/opencontainers/runc/libcontainer/cgroups/fs"
 	fs2 "github.com/opencontainers/runc/libcontainer/cgroups/fs2"
 	configs "github.com/opencontainers/runc/libcontainer/configs"
+
+	info "github.com/google/cadvisor/info/v1"
 )
 
 type CgroupSubsystems struct {
@@ -108,6 +110,55 @@ var supportedSubsystems map[string]struct{} = map[string]struct{}{
 	"perf_event": {},
 }
 
+func DiskStatsCopy0(major, minor uint64) *info.PerDiskStats {
+	disk := info.PerDiskStats{
+		Major: major,
+		Minor: minor,
+	}
+	disk.Stats = make(map[string]uint64)
+	return &disk
+}
+
+type DiskKey struct {
+	Major uint64
+	Minor uint64
+}
+
+func DiskStatsCopy1(diskStat map[DiskKey]*info.PerDiskStats) []info.PerDiskStats {
+	i := 0
+	stat := make([]info.PerDiskStats, len(diskStat))
+	for _, disk := range diskStat {
+		stat[i] = *disk
+		i++
+	}
+	return stat
+}
+
+func DiskStatsCopy(blkioStats []cgroups.BlkioStatEntry) (stat []info.PerDiskStats) {
+	if len(blkioStats) == 0 {
+		return
+	}
+	diskStat := make(map[DiskKey]*info.PerDiskStats)
+	for i := range blkioStats {
+		major := blkioStats[i].Major
+		minor := blkioStats[i].Minor
+		key := DiskKey{
+			Major: major,
+			Minor: minor,
+		}
+		diskp, ok := diskStat[key]
+		if !ok {
+			diskp = DiskStatsCopy0(major, minor)
+			diskStat[key] = diskp
+		}
+		op := blkioStats[i].Op
+		if op == "" {
+			op = "Count"
+		}
+		diskp.Stats[op] = blkioStats[i].Value
+	}
+	return DiskStatsCopy1(diskStat)
+}
 func NewCgroupManager(name string, paths map[string]string) (cgroups.Manager, error) {
 	if cgroups.IsCgroup2UnifiedMode() {
 		path := paths["cpu"]
