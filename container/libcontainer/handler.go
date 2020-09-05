@@ -53,7 +53,7 @@ func (h *Handler) GetStats() (*info.ContainerStats, error) {
 
 	stats := newContainerStats(libcontainerStats, h.includedMetrics)
 
-	klog.Infof("Handler pid: %v", h.pid)
+	//klog.Infof("Handler pid: %v", h.pid)
 
 	return stats, nil
 }

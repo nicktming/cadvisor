@@ -227,7 +227,7 @@ func (cd *containerData) updateStats() error {
 			return nil
 		}
 
-		// Stats may be partially populated, push those before we return an error.
+		// StatsF may be partially populated, push those before we return an error.
 		statsErr = fmt.Errorf("%v, continuing to push stats", statsErr)
 	}
 	if stats == nil {
@@ -263,7 +263,7 @@ func (cd *containerData) updateStats() error {
 		ContainerReference: ref,
 	}
 
-	klog.Infof("======>update stats")
+	//klog.Infof("======>update stats")
 
 	err = cd.memoryCache.AddStats(&cInfo, stats)
 
