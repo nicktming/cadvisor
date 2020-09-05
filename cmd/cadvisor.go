@@ -47,6 +47,7 @@ func main() {
 	time.Sleep(5 * time.Second)
 
 	request := info.DefaultContainerInfoRequest()
+	request.NumStats = 1
 
 	cinfo, err := resourceManager.GetContainerInfo("/", &request)
 	if err != nil {
