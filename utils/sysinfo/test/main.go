@@ -6,6 +6,7 @@ import (
 	"os"
 	"github.com/google/cadvisor/utils/sysinfo"
 	"k8s.io/klog"
+	"encoding/json"
 )
 
 func main() {
@@ -76,4 +77,69 @@ func testGetNodesInfo() {
 		panic(err)
 	}
 	klog.Infof("nodes: %v, cores: %v", nodes, cores)
+
+
+	nodesJSON, err := json.Marshal(nodes)
+	expectedNodes := `
+	[
+      {
+        "node_id": 0,
+        "memory": 33604804608,
+        "hugepages": [
+          {
+            "page_size": 2048,
+            "num_pages": 1
+          }
+        ],
+        "cores": [
+          {
+            "core_id": 0,
+            "thread_ids": [
+              0,
+              1
+            ],
+            "caches": null,
+	    "socket_id": 0
+          }
+        ],
+        "caches": [
+          {
+            "size": 32768,
+            "type": "unified",
+            "level": 3
+          }
+        ]
+      },
+      {
+        "node_id": 1,
+        "memory": 33604804608,
+        "hugepages": [
+          {
+            "page_size": 2048,
+            "num_pages": 1
+          }
+        ],
+        "cores": [
+          {
+            "core_id": 1,
+            "thread_ids": [
+              2,
+              3
+            ],
+            "caches": null,
+	    "socket_id": 1
+          }
+        ],
+        "caches": [
+          {
+            "size": 32768,
+            "type": "unified",
+            "level": 3
+          }
+        ]
+      }
+    ]
+    `
+
+	klog.Infof("nodesJSON==expectedNodes? %v", (string(nodesJSON)==expectedNodes))
 }

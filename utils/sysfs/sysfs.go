@@ -357,3 +357,4 @@ func isZeroCPU(dir string) bool {
 	matches := regex.FindStringSubmatch(dir)
 	return len(matches) == 2 && matches[1] == "0"
 }
+

@@ -21,6 +21,7 @@ import (
 	"flag"
 	"encoding/json"
 	"github.com/google/cadvisor/utils/oomparser"
+	"github.com/google/cadvisor/machine"
 )
 
 var globalHousekeepingInterval = flag.Duration("global_housekeeping_interval", 1*time.Minute, "Interval between global housekeepings")
@@ -66,6 +67,11 @@ type manager struct {
 	inHostNamespace          bool
 	memoryCache              *memory.InMemoryCache
 	eventHandler             events.EventManager
+	machineMu                sync.RWMutex // protects machineInfo
+
+	machineInfo              info.MachineInfo
+
+	sysFs                    sysfs.SysFs
 }
 
 func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, includedMetricsSet container.MetricSet) (Manager, error) {
@@ -101,6 +107,7 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, includedMetricsSe
 		inHostNamespace: 		inHostNamespace,
 		memoryCache: 			memoryCache,
 		includedMetrics: 		includedMetricsSet,
+		sysFs: 				sysfs,
 	}
 
 	newManager.eventHandler = events.NewEventManager(parseEventsStoragePolicy())
@@ -502,6 +509,35 @@ func (m *manager) getContainerData(containerName string) (*containerData, error)
 	return cont, nil
 }
 
+
+func (m *manager) GetMachineInfo() (*info.MachineInfo, error) {
+	m.machineMu.RLock()
+	defer m.machineMu.RUnlock()
+	return m.machineInfo.Clone(), nil
+}
+
+func (m *manager) updateMachineInfo(quit chan error) {
+	ticker := time.NewTicker(*updateMachineInfoInterval)
+	for {
+		select {
+		case <-ticker.C:
+			info, err := machine.Info(m.sysFs, m.fsInfo, m.inHostNamespace)
+			if err != nil {
+				klog.Errorf("Could not get machine info: %v", err)
+				break
+			}
+			m.machineMu.Lock()
+			m.machineInfo = *info
+			m.machineMu.Unlock()
+			klog.Infof("Update machine info: %+v", *info)
+
+		case <-quit:
+			ticker.Stop()
+			quit <- nil
+			return
+		}
+	}
+}
 
 func (m *manager) WatchForEvents(request *events.Request) (*events.EventChannel, error) {
 	return m.eventHandler.WatchEvents(request)
