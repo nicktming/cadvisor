@@ -46,6 +46,9 @@ type Manager interface {
 
 	GetContainerInfo(containerName string, query *info.ContainerInfoRequest) (*info.ContainerInfo, error)
 
+	// Get information about the machine.
+	GetMachineInfo() (*info.MachineInfo, error)
+
 }
 
 type namespacedContainerName struct {
