@@ -32,7 +32,6 @@ import (
 	"github.com/google/cadvisor/devicemapper"
 	"github.com/google/cadvisor/fs"
 	info "github.com/google/cadvisor/info/v1"
-	"github.com/google/cadvisor/machine"
 	"github.com/google/cadvisor/watcher"
 	"github.com/google/cadvisor/zfs"
 
