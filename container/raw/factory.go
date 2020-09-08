@@ -10,6 +10,7 @@ import (
 	watch "github.com/google/cadvisor/watcher"
 	"flag"
 	info "github.com/google/cadvisor/info/v1"
+	"strings"
 )
 
 
@@ -30,6 +31,8 @@ type rawFactory struct {
 
 	includedMetrics 	map[container.MetricKind]struct{}
 
+	// List of raw container cgroup path prefix whitelist.
+	rawPrefixWhiteList []string
 
 }
 
@@ -51,18 +54,18 @@ func (f *rawFactory) CanHandleAndAccept(name string) (bool, bool, error) {
 	if name == "/" {
 		return true, true, nil
 	}
-	//if *dockerOnly && f.rawPrefixWhiteList[0] == "" {
-	//	return true, false, nil
-	//}
-	//for _, prefix := range f.rawPrefixWhiteList {
-	//	if strings.HasPrefix(name, prefix) {
-	//		return true, true, nil
-	//	}
-	//}
+	if *dockerOnly && f.rawPrefixWhiteList[0] == "" {
+		return true, false, nil
+	}
+	for _, prefix := range f.rawPrefixWhiteList {
+		if strings.HasPrefix(name, prefix) {
+			return true, true, nil
+		}
+	}
 	return true, false, nil
 }
 
-func Register(machineInfoFactory info.MachineInfoFactory, fsInfo fs.FsInfo, includedMetrics map[container.MetricKind]struct{}) error {
+func Register(machineInfoFactory info.MachineInfoFactory, fsInfo fs.FsInfo, includedMetrics map[container.MetricKind]struct{}, rawPrefixWhiteList []string) error {
 	cgroupSubsystems, err := libcontainer.GetCgroupSubsystems(includedMetrics)
 	if err != nil {
 		return fmt.Errorf("failed to get cgroup subsystems: %v", err)
@@ -83,6 +86,7 @@ func Register(machineInfoFactory info.MachineInfoFactory, fsInfo fs.FsInfo, incl
 		cgroupSubsystems: 	&cgroupSubsystems,
 		watcher:		watcher,
 		includedMetrics: 	includedMetrics,
+		rawPrefixWhiteList: 	rawPrefixWhiteList,
 	}
 	container.RegisterContainerHandlerFactory(factory, []watch.ContainerWatchSource{watch.Raw})
 	return nil

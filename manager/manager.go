@@ -59,23 +59,24 @@ type namespacedContainerName struct {
 }
 
 type manager struct {
-	containers 		map[namespacedContainerName]*containerData
-	containersLock 		sync.RWMutex
-	containerWatchers 	[]watcher.ContainerWatcher
-	fsInfo 			fs.FsInfo
-	includedMetrics 	container.MetricSet
-	eventsChannel 		chan watcher.ContainerEvent
-	inHostNamespace          bool
-	memoryCache              *memory.InMemoryCache
-	eventHandler             events.EventManager
-	machineMu                sync.RWMutex // protects machineInfo
+	containers 				map[namespacedContainerName]*containerData
+	containersLock 				sync.RWMutex
+	containerWatchers 			[]watcher.ContainerWatcher
+	fsInfo 					fs.FsInfo
+	includedMetrics 			container.MetricSet
+	eventsChannel 				chan watcher.ContainerEvent
+	inHostNamespace          		bool
+	memoryCache              		*memory.InMemoryCache
+	eventHandler             		events.EventManager
+	machineMu                		sync.RWMutex // protects machineInfo
 
-	machineInfo              info.MachineInfo
+	machineInfo              		info.MachineInfo
 
-	sysFs                    sysfs.SysFs
+	sysFs                    		sysfs.SysFs
+	rawContainerCgroupPathPrefixWhiteList 	[]string
 }
 
-func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, includedMetricsSet container.MetricSet) (Manager, error) {
+func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, includedMetricsSet container.MetricSet, rawContainerCgroupPathPrefixWhiteList []string) (Manager, error) {
 	//if memoryCache == nil {
 	//	return nil, fmt.Errorf("manager requires memory storage")
 	//}
@@ -103,12 +104,13 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, includedMetricsSe
 	eventsChannel := make(chan watcher.ContainerEvent, 16)
 
 	newManager := &manager{
-		containers: 			make(map[namespacedContainerName]*containerData),
-		eventsChannel: 			eventsChannel,
-		inHostNamespace: 		inHostNamespace,
-		memoryCache: 			memoryCache,
-		includedMetrics: 		includedMetricsSet,
-		sysFs: 				sysfs,
+		containers: 					make(map[namespacedContainerName]*containerData),
+		eventsChannel: 					eventsChannel,
+		inHostNamespace: 				inHostNamespace,
+		memoryCache: 					memoryCache,
+		includedMetrics: 				includedMetricsSet,
+		sysFs: 						sysfs,
+		rawContainerCgroupPathPrefixWhiteList: 		rawContainerCgroupPathPrefixWhiteList,
 	}
 
 	newManager.eventHandler = events.NewEventManager(parseEventsStoragePolicy())
@@ -166,7 +168,7 @@ func parseEventsStoragePolicy() events.StoragePolicy {
 func (m *manager) Start() error {
 	m.containerWatchers = container.InitializePlugins(m, m.fsInfo, m.includedMetrics)
 
-	err := raw.Register(m, m.fsInfo, m.includedMetrics)
+	err := raw.Register(m, m.fsInfo, m.includedMetrics, m.rawContainerCgroupPathPrefixWhiteList)
 	if err != nil {
 		klog.Errorf("Registration of the raw container factory failed: %v", err)
 	}

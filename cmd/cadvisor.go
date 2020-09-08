@@ -17,6 +17,8 @@ import (
 
 	// Register container providers
 	//_ "github.com/google/cadvisor/cmd/internal/container/install"
+	"os/user"
+	"github.com/google/cadvisor/container/docker"
 )
 
 
@@ -44,7 +46,9 @@ func main() {
 		cadvisormetrics.AppMetrics:              struct{}{},
 	}
 
-	resourceManager, err := manager.New(memoryStorage, sysFs, includedMetrics)
+	ignored := []string{"/kubepods", "/user.slice/user-0.slice/session-462880.scope", "/system.slice/docker.service"}
+
+	resourceManager, err := manager.New(memoryStorage, sysFs, includedMetrics, ignored)
 
 	if err != nil {
 		klog.Infof("Failed to create a manager: %s", err)
