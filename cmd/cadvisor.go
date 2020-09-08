@@ -61,12 +61,15 @@ func main() {
 		klog.Fatal("Failed to start manager: %v", err)
 	}
 
+	e := ""
+
 	klog.Infof("====>got watcher Id: %v", ec.GetWatchId())
 	go func() {
 		for  {
 			select {
 			case event := <- ec.GetChannel():
-				klog.Infof("+++++++++++++++event containerName: %v, type: %v", event.ContainerName, event.EventType)
+				e = event.ContainerName
+				//klog.Infof("+++++++++++++++event containerName: %v, type: %v", event.ContainerName, event.EventType)
 			}
 		}
 	}()

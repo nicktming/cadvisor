@@ -286,10 +286,10 @@ func (m *manager) watchForNewContainers(quit chan error) error {
 				switch {
 				case event.EventType == watcher.ContainerAdd:
 					// TODO create container
-					klog.Infof("watchForNewContainers (watcher.ContainerAdd) event name: %v, watchSource: %v", event.Name, event.WatchSource)
+					//klog.Infof("watchForNewContainers (watcher.ContainerAdd) event name: %v, watchSource: %v", event.Name, event.WatchSource)
 
 				case event.EventType == watcher.ContainerDelete:
-					klog.Infof("watchForNewContainers (watcher.ContainerDelete) event name: %v, watchSource: %v", event.Name, event.WatchSource)
+					//klog.Infof("watchForNewContainers (watcher.ContainerDelete) event name: %v, watchSource: %v", event.Name, event.WatchSource)
 				}
 
 			case <-quit:
