@@ -53,4 +53,5 @@ func (api *version1_0) HandleRequest(requestType string, request []string, m man
 			return err
 		}
 	}
+	return nil
 }

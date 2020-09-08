@@ -84,7 +84,7 @@ func handleRequest(supportedApiVersions map[string]ApiVersion, m manager.Manager
 	if requestType == "" {
 		requestTypes := versionHandler.SupportedRequestTypes()
 		sort.Strings(requestTypes)
-		http.Error(w, fmt.Sprintf("Supported request types: %q", strings.Join(requestType, ",")), http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Supported request types: %q", strings.Join(requestTypes, ",")), http.StatusBadRequest)
 		return nil
 	}
 
