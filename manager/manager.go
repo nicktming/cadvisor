@@ -194,10 +194,10 @@ func (m *manager) Start() error {
 		return err
 	}
 	klog.Infof("Starting recovery of all containers")
-	//err = m.detectSubcontainers("/")
-	//if err != nil {
-	//	return err
-	//}
+	err = m.detectSubcontainers("/")
+	if err != nil {
+		return err
+	}
 	//klog.V(2).Infof("Recovery completed")
 
 
@@ -272,11 +272,11 @@ func (m *manager) watchForNewContainers(quit chan error) error {
 	}
 	// TODO watcher stop
 
-	// There is a race between starting the watch and new container creation so we do a detection before we read new containers.
-	//err := m.detectSubcontainers("/")
-	//if err != nil {
-	//	return err
-	//}
+	 //There is a race between starting the watch and new container creation so we do a detection before we read new containers.
+	err := m.detectSubcontainers("/")
+	if err != nil {
+		return err
+	}
 
 
 	go func(){
@@ -287,9 +287,11 @@ func (m *manager) watchForNewContainers(quit chan error) error {
 				case event.EventType == watcher.ContainerAdd:
 					// TODO create container
 					//klog.Infof("watchForNewContainers (watcher.ContainerAdd) event name: %v, watchSource: %v", event.Name, event.WatchSource)
+					err = m.createContainer(event.Name, event.WatchSource)
 
 				case event.EventType == watcher.ContainerDelete:
 					//klog.Infof("watchForNewContainers (watcher.ContainerDelete) event name: %v, watchSource: %v", event.Name, event.WatchSource)
+					//err = m.destroyContainer(event.Name)
 				}
 
 			case <-quit:
@@ -367,28 +369,28 @@ func (m *manager) getContainersDiff(containerName string) (added []info.Containe
 }
 
 func (m *manager) detectSubcontainers(containerName string) error {
-	_, _, err := m.getContainersDiff(containerName)
+	added, _, err := m.getContainersDiff(containerName)
 	//added, removed, err := m.getContainersDiff(containerName)
 	if err != nil {
 		return err
 	}
 
-	// Add the new containers.
-	//for _, cont := range added {
-		//klog.Infof("Add container name: %v", cont.Name)
-		//err = m.createContainer(cont.Name, watcher.Raw)
-		//if err != nil {
-		//	klog.Errorf("Failed to create existing container: %s: %s", cont.Name, err)
-		//}
-	//}
+	 //Add the new containers.
+	for _, cont := range added {
+		klog.Infof("Add container name: %v", cont.Name)
+		err = m.createContainer(cont.Name, watcher.Raw)
+		if err != nil {
+			klog.Errorf("Failed to create existing container: %s: %s", cont.Name, err)
+		}
+	}
 
-	// Remove the old containers.
+	 //Remove the old containers.
 	//for _, cont := range removed {
 	//	klog.Infof("Remove container name: %v", cont.Name)
-		//err = m.destroyContainer(cont.Name)
-		//if err != nil {
-		//	klog.Errorf("Failed to destroy existing container: %s: %s", cont.Name, err)
-		//}
+	//	err = m.destroyContainer(cont.Name)
+	//	if err != nil {
+	//		klog.Errorf("Failed to destroy existing container: %s: %s", cont.Name, err)
+	//	}
 	//}
 
 	return nil
