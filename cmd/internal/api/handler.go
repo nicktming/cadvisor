@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/google/cadvisor/manager"
 	httpmux "github.com/google/cadvisor/cmd/internal/http/mux"
+	info "github.com/google/cadvisor/info/v1"
 	"net/http"
 	"time"
 	"k8s.io/klog"
@@ -11,6 +12,8 @@ import (
 	"sort"
 	"regexp"
 	"encoding/json"
+	"path"
+	"io"
 )
 
 
@@ -105,3 +108,60 @@ func writeResult(res interface{}, w http.ResponseWriter) error {
 	w.Write(out)
 	return nil
 }
+
+func getContainerName(request []string) string {
+	return path.Join("/", strings.Join(request, "/"))
+}
+
+func getContainerInfoRequest(body io.ReadCloser) (*info.ContainerInfoRequest, error) {
+	query := info.DefaultContainerInfoRequest()
+	decoder := json.NewDecoder(body)
+	err := decoder.Decode(&query)
+	if err != nil && err != io.EOF {
+		return nil, fmt.Errorf("unable to decode the json value: %s", err)
+	}
+	return &query, nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

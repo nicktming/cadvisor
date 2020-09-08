@@ -205,6 +205,10 @@ func (m *manager) Start() error {
 	if err != nil {
 		return err
 	}
+
+	quitUpdateMachineInfo := make(chan error)
+	// TODO m.quitChannels
+	go m.updateMachineInfo(quitUpdateMachineInfo)
 	return nil
 }
 
