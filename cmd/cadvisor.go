@@ -16,7 +16,7 @@ import (
 	"fmt"
 )
 var argIp = flag.String("listen_ip", "", "IP to listen on, defaults to all IPs")
-var argPort = flag.Int("port", 8080, "port to listen")
+var argPort = flag.Int("port", 9090, "port to listen")
 
 var urlBasePrefix = flag.String("url_base_prefix", "", "prefix path that will be prepended to all paths to support some reverse proxies")
 
@@ -56,7 +56,6 @@ func main() {
 		klog.Fatal("Failed to start manager: %v", err)
 	}
 
-	stop := make(chan struct{})
 	klog.Infof("====>got watcher Id: %v", ec.GetWatchId())
 	go func() {
 		for  {
@@ -97,9 +96,9 @@ func main() {
 	rootMux.Handle(*urlBasePrefix + "/", http.StripPrefix(*urlBasePrefix, mux))
 
 	addr := fmt.Sprintf("%s:%d", *argIp, *argPort)
+	klog.Infof("start to listen at addr: %s", addr)
 	klog.Fatal(http.ListenAndServe(addr, rootMux))
 
-	<- stop
 
 }
 
