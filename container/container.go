@@ -5,8 +5,18 @@ import info "github.com/google/cadvisor/info/v1"
 type ListType int
 
 const (
-	ListSelf 	ListType = iota
+	ListSelf ListType = iota
 	ListRecursive
+)
+
+type ContainerType int
+
+const (
+	ContainerTypeRaw ContainerType = iota
+	ContainerTypeDocker
+	ContainerTypeCrio
+	ContainerTypeContainerd
+	ContainerTypeMesos
 )
 
 type ContainerHandler interface {

@@ -105,6 +105,16 @@ type Plugin interface {
 	Register(fsInfo fs.FsInfo, includedMetrics MetricSet) (watcher.ContainerWatcher, error)
 }
 
+func RegisterPlugin(name string, plugin Plugin) error {
+	pluginsLock.Lock()
+	defer pluginsLock.Unlock()
+	if _, found := plugins[name]; found {
+		return fmt.Errorf("Plugin %q was registered twice", name)
+	}
+	klog.V(4).Infof("Registered Plugin %q", name)
+	plugins[name] = plugin
+	return nil
+}
 
 func InitializePlugins(fsInfo fs.FsInfo, includedMetrics MetricSet) []watcher.ContainerWatcher {
 	pluginsLock.Lock()

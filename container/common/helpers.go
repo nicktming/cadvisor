@@ -263,4 +263,20 @@ func CgroupExists(cgroupPaths map[string]string) bool {
 	return false
 }
 
+// AssignDeviceNamesToDiskStats assigns the Device field on the provided DiskIoStats by looking up
+// the device major and minor identifiers in the provided device namer.
+//func AssignDeviceNamesToDiskStats(namer DeviceNamer, stats *info.DiskIoStats) {
+//	assignDeviceNamesToPerDiskStats(
+//		namer,
+//		stats.IoMerged,
+//		stats.IoQueued,
+//		stats.IoServiceBytes,
+//		stats.IoServiceTime,
+//		stats.IoServiced,
+//		stats.IoTime,
+//		stats.IoWaitTime,
+//		stats.Sectors,
+//	)
+//}
+
 
