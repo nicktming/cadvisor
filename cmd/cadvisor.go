@@ -9,7 +9,16 @@ import (
 	"encoding/json"
 	"time"
 	cadvisormetrics "github.com/google/cadvisor/container"
+	"net/http"
+
+	cadvisorhttp "github.com/google/cadvisor/cmd/internal/http"
+	"flag"
+	"fmt"
 )
+var argIp = flag.String("listen_ip", "", "IP to listen on, defaults to all IPs")
+var argPort = flag.Int("port", 8080, "port to listen")
+
+var urlBasePrefix = flag.String("url_base_prefix", "", "prefix path that will be prepended to all paths to support some reverse proxies")
 
 func main() {
 
@@ -73,6 +82,22 @@ func main() {
 	pretty_cinfo, _ := json.MarshalIndent(cinfo, "", "\t")
 
 	klog.Infof("pretty cinfo: %v", string(pretty_cinfo))
+
+
+
+
+
+	mux := http.NewServeMux()
+	err = cadvisorhttp.RegisterHandlers(mux, resourceManager, *urlBasePrefix)
+	if err != nil {
+		klog.Fatalf("Failed to register HTTP handlers: %v", err)
+	}
+
+	rootMux := http.NewServeMux()
+	rootMux.Handle(*urlBasePrefix + "/", http.StripPrefix(*urlBasePrefix, mux))
+
+	addr := fmt.Sprintf("%s:%d", *argIp, *argPort)
+	klog.Fatal(http.ListenAndServe(addr, rootMux))
 
 	<- stop
 
