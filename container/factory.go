@@ -112,7 +112,7 @@ func RegisterPlugin(name string, plugin Plugin) error {
 	if _, found := plugins[name]; found {
 		return fmt.Errorf("Plugin %q was registered twice", name)
 	}
-	klog.V(4).Infof("Registered Plugin %q", name)
+	klog.Infof("+++++++++++Registered Plugin %q", name)
 	plugins[name] = plugin
 	return nil
 }

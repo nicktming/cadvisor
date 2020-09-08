@@ -26,6 +26,8 @@ import (
 	"time"
 
 	"github.com/google/cadvisor/info/v1"
+
+	"k8s.io/klog"
 )
 
 var dockerTimeout = 10 * time.Second
@@ -116,6 +118,7 @@ func Images() ([]v1.DockerImage, error) {
 // error otherwise.
 func ValidateInfo() (*dockertypes.Info, error) {
 	client, err := Client()
+	klog.Infof("Client connect with client: %v, err: %v", client, err)
 	if err != nil {
 		return nil, fmt.Errorf("unable to communicate with docker daemon: %v", err)
 	}
