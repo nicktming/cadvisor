@@ -58,7 +58,7 @@ func StatusWithContext(ctx context.Context) (v1.DockerStatus, error) {
 
 func StatusFromDockerInfo(dockerInfo dockertypes.Info) (v1.DockerStatus, error) {
 	out := v1.DockerStatus{}
-	out.KernelVersion = machine.KernelVersion()
+	//out.KernelVersion = machine.KernelVersion()
 	out.OS = dockerInfo.OperatingSystem
 	out.Hostname = dockerInfo.Name
 	out.RootDir = dockerInfo.DockerRootDir

@@ -9,6 +9,7 @@ import (
 	"k8s.io/klog"
 	watch "github.com/google/cadvisor/watcher"
 	"flag"
+	info "github.com/google/cadvisor/info/v1"
 )
 
 
@@ -17,6 +18,10 @@ var disableRootCgroupStats = flag.Bool("disable_root_cgroup_stats", false, "Disa
 
 
 type rawFactory struct {
+
+	// Factory for machine information.
+	machineInfoFactory info.MachineInfoFactory
+
 	fsInfo 			fs.FsInfo
 
 	cgroupSubsystems 	*libcontainer.CgroupSubsystems
@@ -57,7 +62,7 @@ func (f *rawFactory) CanHandleAndAccept(name string) (bool, bool, error) {
 	return true, false, nil
 }
 
-func Register(fsInfo fs.FsInfo, includedMetrics map[container.MetricKind]struct{}) error {
+func Register(machineInfoFactory info.MachineInfoFactory, fsInfo fs.FsInfo, includedMetrics map[container.MetricKind]struct{}) error {
 	cgroupSubsystems, err := libcontainer.GetCgroupSubsystems(includedMetrics)
 	if err != nil {
 		return fmt.Errorf("failed to get cgroup subsystems: %v", err)
@@ -73,6 +78,7 @@ func Register(fsInfo fs.FsInfo, includedMetrics map[container.MetricKind]struct{
 
 	klog.Infof("Registering Raw factory")
 	factory := &rawFactory{
+		machineInfoFactory: 	machineInfoFactory,
 		fsInfo: 		fsInfo,
 		cgroupSubsystems: 	&cgroupSubsystems,
 		watcher:		watcher,

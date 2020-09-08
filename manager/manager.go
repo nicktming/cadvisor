@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"github.com/google/cadvisor/utils/oomparser"
 	"github.com/google/cadvisor/machine"
+	"github.com/google/cadvisor/container/docker"
 )
 
 var globalHousekeepingInterval = flag.Duration("global_housekeeping_interval", 1*time.Minute, "Interval between global housekeepings")
@@ -163,9 +164,9 @@ func parseEventsStoragePolicy() events.StoragePolicy {
 }
 
 func (m *manager) Start() error {
-	m.containerWatchers = container.InitializePlugins(m.fsInfo, m.includedMetrics)
+	m.containerWatchers = container.InitializePlugins(m, m.fsInfo, m.includedMetrics)
 
-	err := raw.Register(m.fsInfo, m.includedMetrics)
+	err := raw.Register(m, m.fsInfo, m.includedMetrics)
 	if err != nil {
 		klog.Errorf("Registration of the raw container factory failed: %v", err)
 	}
@@ -574,8 +575,36 @@ func (f partialFailure) OrNil() error {
 	return f
 }
 
+func (m *manager) GetVersionInfo() (*info.VersionInfo, error) {
+	// TODO: Consider caching this and periodically updating.  The VersionInfo may change if
+	// the docker daemon is started after the cAdvisor client is created.  Caching the value
+	// would be helpful so we would be able to return the last known docker version if
+	// docker was down at the time of a query.
+	return getVersionInfo()
+}
 
+func getVersionInfo() (*info.VersionInfo, error) {
 
+	//kernelVersion := machine.KernelVersion()
+	//osVersion := machine.ContainerOsVersion()
+	dockerVersion, err := docker.VersionString()
+	if err != nil {
+		return nil, err
+	}
+	dockerAPIVersion, err := docker.APIVersionString()
+	if err != nil {
+		return nil, err
+	}
+
+	return &info.VersionInfo{
+		//KernelVersion:      kernelVersion,
+		//ContainerOsVersion: osVersion,
+		DockerVersion:      dockerVersion,
+		DockerAPIVersion:   dockerAPIVersion,
+		//CadvisorVersion:    version.Info["version"],
+		//CadvisorRevision:   version.Info["revision"],
+	}, nil
+}
 
 
 

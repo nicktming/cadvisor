@@ -220,9 +220,9 @@ func startThinPoolWatcher(dockerInfo *dockertypes.Info) (*devicemapper.ThinPoolW
 		return nil, err
 	}
 
-	if err := ensureThinLsKernelVersion(machine.KernelVersion()); err != nil {
-		return nil, err
-	}
+	//if err := ensureThinLsKernelVersion(machine.KernelVersion()); err != nil {
+	//	return nil, err
+	//}
 
 	if disableThinLs {
 		return nil, fmt.Errorf("usage of thin_ls is disabled to preserve iops")

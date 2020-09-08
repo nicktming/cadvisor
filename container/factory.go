@@ -6,6 +6,7 @@ import (
 	"github.com/google/cadvisor/watcher"
 	"k8s.io/klog"
 	"fmt"
+	info "github.com/google/cadvisor/info/v1"
 )
 
 
@@ -102,7 +103,7 @@ type Plugin interface {
 
 	InitializeFSContext(context *fs.Context) error
 
-	Register(fsInfo fs.FsInfo, includedMetrics MetricSet) (watcher.ContainerWatcher, error)
+	Register(factory info.MachineInfoFactory, fsInfo fs.FsInfo, includedMetrics MetricSet) (watcher.ContainerWatcher, error)
 }
 
 func RegisterPlugin(name string, plugin Plugin) error {
@@ -116,13 +117,13 @@ func RegisterPlugin(name string, plugin Plugin) error {
 	return nil
 }
 
-func InitializePlugins(fsInfo fs.FsInfo, includedMetrics MetricSet) []watcher.ContainerWatcher {
+func InitializePlugins(factory info.MachineInfoFactory, fsInfo fs.FsInfo, includedMetrics MetricSet) []watcher.ContainerWatcher {
 	pluginsLock.Lock()
 	defer pluginsLock.Unlock()
 
 	containerWatchers := []watcher.ContainerWatcher{}
 	for name, plugin := range plugins {
-		watcher, err := plugin.Register(fsInfo, includedMetrics)
+		watcher, err := plugin.Register(factory, fsInfo, includedMetrics)
 		if err != nil {
 			klog.Infof("Registration of the %s container factory failed: %v", name, err)
 		}
