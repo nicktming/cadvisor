@@ -14,7 +14,12 @@ import (
 	cadvisorhttp "github.com/google/cadvisor/cmd/internal/http"
 	"flag"
 	"fmt"
+
+	// Register container providers
+	_ "github.com/google/cadvisor/cmd/internal/container/install"
 )
+
+
 var argIp = flag.String("listen_ip", "", "IP to listen on, defaults to all IPs")
 var argPort = flag.Int("port", 9090, "port to listen")
 
@@ -81,10 +86,6 @@ func main() {
 	pretty_cinfo, _ := json.MarshalIndent(cinfo, "", "\t")
 
 	klog.Infof("pretty cinfo: %v", string(pretty_cinfo))
-
-
-
-
 
 	mux := http.NewServeMux()
 	err = cadvisorhttp.RegisterHandlers(mux, resourceManager, *urlBasePrefix)
