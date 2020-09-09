@@ -59,24 +59,21 @@ func main() {
 	req.EventType[info.EventOom] = true
 	req.EventType[info.EventOomKill] = true
 
-	ec, err := resourceManager.WatchForEvents(req)
+	//ec, err := resourceManager.WatchForEvents(req)
 
 	if err := resourceManager.Start(); err != nil {
 		klog.Fatal("Failed to start manager: %v", err)
 	}
 
-	e := ""
-
-	klog.Infof("====>got watcher Id: %v", ec.GetWatchId())
-	go func() {
-		for  {
-			select {
-			case event := <- ec.GetChannel():
-				e = event.ContainerName
-				//klog.Infof("+++++++++++++++event containerName: %v, type: %v", event.ContainerName, event.EventType)
-			}
-		}
-	}()
+	//klog.Infof("====>got watcher Id: %v", ec.GetWatchId())
+	//go func() {
+	//	for  {
+	//		select {
+	//		case event := <- ec.GetChannel():
+	//			klog.Infof("+++++++++++++++event containerName: %v, type: %v", event.ContainerName, event.EventType)
+	//		}
+	//	}
+	//}()
 
 	time.Sleep(5 * time.Second)
 
