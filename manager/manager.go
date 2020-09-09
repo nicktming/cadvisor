@@ -24,7 +24,6 @@ import (
 	"github.com/google/cadvisor/machine"
 	"github.com/google/cadvisor/container/docker"
 	"github.com/google/cadvisor/info/v2"
-	"github.com/google/cadvisor/devicemapper"
 )
 
 var globalHousekeepingInterval = flag.Duration("global_housekeeping_interval", 1*time.Minute, "Interval between global housekeepings")
