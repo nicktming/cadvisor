@@ -135,7 +135,7 @@ func (cd *containerData) housekeeping() {
 	}
 
 	// Housekeep every second.
-	klog.V(3).Infof("Start housekeeping for container %q\n", cd.info.Name)
+	klog.Infof("Start housekeeping for container %q\n", cd.info.Name)
 	houseKeepingTimer := cd.clock.NewTimer(0 * time.Second)
 	defer houseKeepingTimer.Stop()
 	for {

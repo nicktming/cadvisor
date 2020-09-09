@@ -446,6 +446,7 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 	klog.Infof("+++++++++++++++++containerName: %v, contSpec: %v", containerName, string(pretty_contSpec))
 
 	contRef, err := cont.handler.ContainerReference()
+	klog.Infof("+++++++++++++++++containerName: %v, contRef: %v, err: %v", containerName, contRef, err)
 	if err != nil {
 		return err
 	}
@@ -456,10 +457,11 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 		EventType:     info.EventContainerCreation,
 	}
 	err = m.eventHandler.AddEvent(newEvent)
+	klog.Infof("+++++++++++++++++containerName: %v, add event err: %v", containerName, err)
 	if err != nil {
 		return err
 	}
-
+	klog.Infof("+++++++++++++++++containerName: %v, container start", containerName)
 	return cont.Start()
 }
 
