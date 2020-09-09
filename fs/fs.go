@@ -200,7 +200,9 @@ func (i *RealFsInfo) GetDirFsDevice(dir string) (*DeviceInfo, error) {
 	// The type Dev in Stat_t is 32bit on mips.
 	major := major(uint64(buf.Dev)) // nolint: unconvert
 	minor := minor(uint64(buf.Dev)) // nolint: unconvert
+	klog.Infof("++++++GetDirFsDevice major: %v, minor: %v", major, minor)
 	for device, partition := range i.partitions {
+		klog.Infof("++++++GetDirFsDevice partition mountpoint: %v, major: %v, minor: %v", partition.mountpoint, partition.major, partition.minor)
 		if partition.major == major && partition.minor == minor {
 			return &DeviceInfo{device, major, minor}, nil
 		}
@@ -438,3 +440,79 @@ func (i *RealFsInfo) GetDirUsage(dir string) (UsageInfo, error) {
 	defer releaseToken()
 	return GetDirUsage(dir)
 }
+
+func (i *RealFsInfo) GetMountpointForDevice(dev string) (string, error) {
+	p, ok := i.partitions[dev]
+	if !ok {
+		return "", fmt.Errorf("no partition info for device %q", dev)
+	}
+	return p.mountpoint, nil
+}
+
+func (i *RealFsInfo) GetDeviceForLabel(label string) (string, error) {
+	dev, ok := i.labels[label]
+	if !ok {
+		return "", fmt.Errorf("non-existent label %q", label)
+	}
+	return dev, nil
+}
+
+
+func (i *RealFsInfo) GetLabelsForDevice(device string) ([]string, error) {
+	labels := []string{}
+	for label, dev := range i.labels {
+		if dev == device {
+			labels = append(labels, label)
+		}
+	}
+	return labels, nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

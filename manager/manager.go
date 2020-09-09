@@ -23,6 +23,7 @@ import (
 	"github.com/google/cadvisor/utils/oomparser"
 	"github.com/google/cadvisor/machine"
 	"github.com/google/cadvisor/container/docker"
+	"github.com/google/cadvisor/info/v2"
 )
 
 var globalHousekeepingInterval = flag.Duration("global_housekeeping_interval", 1*time.Minute, "Interval between global housekeepings")
@@ -50,6 +51,8 @@ type Manager interface {
 
 	// Get information about the machine.
 	GetMachineInfo() (*info.MachineInfo, error)
+
+	GetDirFsInfo(dir string) (v2.FsInfo, error)
 
 }
 
@@ -611,6 +614,130 @@ func getVersionInfo() (*info.VersionInfo, error) {
 		//CadvisorRevision:   version.Info["revision"],
 	}, nil
 }
+
+func (m *manager) GetDirFsInfo(dir string) (v2.FsInfo, error) {
+	device, err := m.fsInfo.GetDirFsDevice(dir)
+	if err != nil {
+		return v2.FsInfo{}, fmt.Errorf("failed to get device for dir %q: %v", dir, err)
+	}
+	return m.getFsInfoByDeviceName(device.Device)
+}
+
+func (m *manager) GetFsInfo(label string) ([]v2.FsInfo, error) {
+	var empty time.Time
+	stats, err := m.memoryCache.RecentStats("/", empty, empty, 1)
+	if err != nil {
+		return nil, err
+	}
+	dev := ""
+	if len(label) != 0 {
+		dev, err := m.fsInfo.GetDeviceForLabel(label)
+		klog.Infof("+++++++++++ get dev: %v for label: %v", dev, label)
+		if err != nil {
+			return nil, err
+		}
+	}
+	fsInfo := []v2.FsInfo{}
+	for i := range stats[0].Filesystem {
+		fs := stats[0].Filesystem[i]
+		if len(label) != 0 && fs.Device != dev {
+			continue
+		}
+		// len(label0 == 0 || fs.Device == dev
+		mountpoint, err := m.fsInfo.GetMountpointForDevice(fs.Device)
+		if err != nil {
+			return nil, err
+		}
+		labels, err := m.fsInfo.GetLabelsForDevice(fs.Device)
+		if err != nil {
+			return nil, err
+		}
+
+		fi := v2.FsInfo{
+			Timestamp: 		stats[0].Timestamp,
+			Device: 		fs.Device,
+			Mountpoint: 		mountpoint,
+			Capacity: 		fs.Limit,
+			Usage: 			fs.Usage,
+			Available: 		fs.Available,
+			Labels: 		labels,
+		}
+
+		if fs.HasInodes {
+			fi.Inodes = &fs.Inodes
+			fi.InodesFree = &fs.InodesFree
+		}
+		fsInfo = append(fsInfo, fi)
+	}
+	return fsInfo, nil
+}
+
+func (m *manager) getFsInfoByDeviceName(deviceName string) (v2.FsInfo, error) {
+	mountPoint, err := m.fsInfo.GetMountpointForDevice(deviceName)
+	if err != nil {
+		return v2.FsInfo{}, fmt.Errorf("failed to get mount point for device %q: %v", deviceName, err)
+	}
+	klog.Infof("++++++++++ deviceName: %v, mountPoint: %v", deviceName, mountPoint)
+	infos, err := m.GetFsInfo("")
+	if err != nil {
+		return v2.FsInfo{}, err
+	}
+	for _, info := range infos {
+		if info.Mountpoint == mountPoint {
+			return info, nil
+		}
+	}
+	return v2.FsInfo{}, fmt.Errorf("cannot find filesystem info for device %q", deviceName)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

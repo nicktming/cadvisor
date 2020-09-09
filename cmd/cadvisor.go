@@ -91,6 +91,13 @@ func main() {
 
 	klog.Infof("pretty cinfo: %v", string(pretty_cinfo))
 
+
+
+	fs, _ := resourceManager.GetDirFsInfo("/var/lib/kubelet")
+	pretty_fs, _ := json.MarshalIndent(fs, "", "\t")
+
+	klog.Infof("pretty fs: %v", string(pretty_fs))
+
 	mux := http.NewServeMux()
 	err = cadvisorhttp.RegisterHandlers(mux, resourceManager, *urlBasePrefix)
 	if err != nil {
