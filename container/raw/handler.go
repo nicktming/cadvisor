@@ -98,7 +98,7 @@ func newRawContainerHandler(name string, cgroupSubsystems *libcontainer.CgroupSu
 
 	cgroupPaths := common.MakeCgroupPaths(cgroupSubsystems.MountPoints, name)
 
-	log.Printf("name: %v, cgroupPaths: %v\n", name, cgroupPaths)
+	//log.Printf("name: %v, cgroupPaths: %v\n", name, cgroupPaths)
 
 	cgroupManager, err := libcontainer.NewCgroupManager(name, cgroupPaths)
 	if err != nil {

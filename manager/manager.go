@@ -379,7 +379,7 @@ func (m *manager) detectSubcontainers(containerName string) error {
 
 	 //Add the new containers.
 	for _, cont := range added {
-		klog.Infof("Add container name: %v", cont.Name)
+		//klog.Infof("Add container name: %v", cont.Name)
 		err = m.createContainer(cont.Name, watcher.Raw)
 		if err != nil {
 			klog.Errorf("Failed to create existing container: %s: %s", cont.Name, err)
@@ -443,7 +443,7 @@ func (m *manager) createContainerLocked(containerName string, watchSource watche
 	}
 
 	pretty_contSpec, _ := json.MarshalIndent(contSpec, "", "\t")
-	klog.Infof("+++++++++++++++++contSpec: %v", string(pretty_contSpec))
+	klog.Infof("+++++++++++++++++containerName: %v, contSpec: %v", containerName, string(pretty_contSpec))
 
 	contRef, err := cont.handler.ContainerReference()
 	if err != nil {

@@ -167,10 +167,10 @@ func NewContainerHandler(name string, watchType watcher.ContainerWatchSource, in
 		if err != nil {
 			klog.Infof("Error trying to work out if we can handle %s: %v", name, err)
 		}
-		klog.Infof("++++++++++++factory: %v, canHandle: %v, canAccept: %v for name: %v", factory.String(), canHandle, canAccept, name)
+		//klog.Infof("++++++++++++factory: %v, canHandle: %v, canAccept: %v for name: %v", factory.String(), canHandle, canAccept, name)
 		if canHandle {
 			if !canAccept {
-				klog.V(3).Infof("Factory %q can handle container %q, but ignoring.", factory, name)
+				klog.Infof("Factory %q can handle container %q, but ignoring.", factory, name)
 				return nil, false, nil
 			}
 			klog.Infof("Using factory %q for container %q", factory, name)
