@@ -5,7 +5,6 @@ import (
 	"github.com/google/cadvisor/container/common"
 	"github.com/google/cadvisor/container"
 	"github.com/google/cadvisor/container/libcontainer"
-	"log"
 	info "github.com/google/cadvisor/info/v1"
 	"k8s.io/klog"
 )
