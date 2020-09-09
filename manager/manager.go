@@ -102,6 +102,13 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, includedMetricsSe
 		inHostNamespace = true
 	}
 
+	context := fs.Context{}
+
+	fsInfo, err := fs.NewFsInfo(context)
+	if err != nil {
+		return nil, err
+	}
+
 	klog.Infof("cadvisor with inHostNamespace: %v and selfContainer: %v", inHostNamespace, selfContainer)
 
 	eventsChannel := make(chan watcher.ContainerEvent, 16)
@@ -114,6 +121,7 @@ func New(memoryCache *memory.InMemoryCache, sysfs sysfs.SysFs, includedMetricsSe
 		includedMetrics: 				includedMetricsSet,
 		sysFs: 						sysfs,
 		rawContainerCgroupPathPrefixWhiteList: 		rawContainerCgroupPathPrefixWhiteList,
+		fsInfo: 					fsInfo,
 	}
 
 	newManager.eventHandler = events.NewEventManager(parseEventsStoragePolicy())
