@@ -24,6 +24,7 @@ import (
 	"github.com/google/cadvisor/machine"
 	"github.com/google/cadvisor/container/docker"
 	"github.com/google/cadvisor/info/v2"
+	"github.com/google/cadvisor/devicemapper"
 )
 
 var globalHousekeepingInterval = flag.Duration("global_housekeeping_interval", 1*time.Minute, "Interval between global housekeepings")
@@ -660,6 +661,8 @@ func (m *manager) GetFsInfo(label string) ([]v2.FsInfo, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		klog.Infof("++++++++++++++++mountpoint: %v, device: %v", mountpoint, fs.Device)
 
 		fi := v2.FsInfo{
 			Timestamp: 		stats[0].Timestamp,
