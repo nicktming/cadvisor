@@ -28,7 +28,7 @@ import (
 	cadvisorapiv2 "github.com/google/cadvisor/info/v2"
 	"github.com/google/cadvisor/manager"
 	"github.com/google/cadvisor/utils/sysfs"
-	"k8s.io/klog"
+
 )
 
 type cadvisorClient struct {
@@ -61,7 +61,7 @@ func init() {
 			f.DefValue = defaultValue
 			f.Value.Set(defaultValue)
 		} else {
-			klog.Errorf("Expected cAdvisor flag %q not found", name)
+			fmt.Errorf("Expected cAdvisor flag %q not found", name)
 		}
 	}
 }
@@ -162,7 +162,7 @@ func (cc *cadvisorClient) getFsInfo(label string) (cadvisorapiv2.FsInfo, error) 
 	}
 	// TODO(vmarmol): Handle this better when a label has more than one image filesystem.
 	if len(res) > 1 {
-		klog.Warningf("More than one filesystem labeled %q: %#v. Only using the first one", label, res)
+		fmt.Errorf("More than one filesystem labeled %q: %#v. Only using the first one", label, res)
 	}
 
 	return res[0], nil
