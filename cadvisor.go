@@ -41,7 +41,7 @@ import (
 )
 
 var argIp = flag.String("listen_ip", "", "IP to listen on, defaults to all IPs")
-var argPort = flag.Int("port", 8080, "port to listen")
+var argPort = flag.Int("port", 8081, "port to listen")
 var maxProcs = flag.Int("max_procs", 0, "max number of CPUs that can be used simultaneously. Less than 1 for default (number of cores).")
 
 var versionFlag = flag.Bool("version", false, "print cAdvisor version and exit")
