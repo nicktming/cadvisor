@@ -300,6 +300,7 @@ type manager struct {
 
 // Start the container manager.
 func (self *manager) Start() error {
+	klog.Infof("============Start()============")
 	err := docker.Register(self, self.fsInfo, self.includedMetrics)
 	if err != nil {
 		klog.V(5).Infof("Registration of the Docker container factory failed: %v.", err)

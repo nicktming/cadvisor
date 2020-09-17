@@ -38,6 +38,7 @@ import (
 	libcontainerconfigs "github.com/opencontainers/runc/libcontainer/configs"
 	"golang.org/x/net/context"
 	"k8s.io/klog"
+	"encoding/json"
 )
 
 const (
@@ -189,6 +190,9 @@ func newDockerContainerHandler(
 	if err != nil {
 		return nil, fmt.Errorf("failed to inspect container %q: %v", id, err)
 	}
+
+	pretty_ctnr, _ := json.MarshalIndent(ctnr, "", "\t")
+	klog.Infof("=====>pretty_ctnr: %v", string(pretty_ctnr))
 
 	// TODO: extract object mother method
 	handler := &dockerContainerHandler{
