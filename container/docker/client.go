@@ -37,7 +37,7 @@ func Client() (*dclient.Client, error) {
 	dockerClientOnce.Do(func() {
 		var client *http.Client
 		log.Printf("======>ArgDockerTLS: %v, ArgDockerCA: %v, ArgDockerCert: %v, ArgDockerKey: %v\n",
-			ArgDockerTLS, ArgDockerCA, ArgDockerCert, ArgDockerKey)
+			*ArgDockerTLS, *ArgDockerCA, *ArgDockerCert, *ArgDockerKey)
 		if *ArgDockerTLS {
 			client = &http.Client{}
 			options := tlsconfig.Options{
@@ -61,5 +61,6 @@ func Client() (*dclient.Client, error) {
 			nil)
 
 	})
+	log.Printf("======>dockerClientErr: %v\n", dockerClientErr)
 	return dockerClient, dockerClientErr
 }
