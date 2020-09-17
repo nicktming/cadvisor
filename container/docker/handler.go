@@ -192,7 +192,7 @@ func newDockerContainerHandler(
 	}
 
 	pretty_ctnr, _ := json.MarshalIndent(ctnr, "", "\t")
-	klog.Infof("=====>pretty_ctnr: %v", string(pretty_ctnr))
+	fmt.Printf("=====>pretty_ctnr: %v", string(pretty_ctnr))
 
 	// TODO: extract object mother method
 	handler := &dockerContainerHandler{

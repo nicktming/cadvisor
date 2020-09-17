@@ -126,11 +126,11 @@ func init() {
 }
 
 func main() {
-	klog.Infof("111111111111")
+	fmt.Println("111111111111")
 	klog.InitFlags(nil)
 	defer klog.Flush()
 	flag.Parse()
-	klog.Infof("222222222222")
+	fmt.Println("222222222222")
 	if *versionFlag {
 		fmt.Printf("cAdvisor version %s (%s)\n", version.Info["version"], version.Info["revision"])
 		os.Exit(0)
@@ -139,7 +139,7 @@ func main() {
 	includedMetrics := toIncludedMetrics(ignoreMetrics.MetricSet)
 
 	setMaxProcs()
-	klog.Infof("333333333333")
+	fmt.Println("333333333333")
 	memoryStorage, err := NewMemoryStorage()
 	if err != nil {
 		klog.Fatalf("Failed to initialize storage driver: %s", err)
@@ -148,7 +148,7 @@ func main() {
 	sysFs := sysfs.NewRealSysFs()
 
 	collectorHttpClient := createCollectorHttpClient(*collectorCert, *collectorKey)
-	klog.Infof("444444444444")
+	fmt.Println("444444444444")
 	containerManager, err := manager.New(memoryStorage, sysFs, *maxHousekeepingInterval, *allowDynamicHousekeeping, includedMetrics, &collectorHttpClient, strings.Split(*rawCgroupPrefixWhiteList,","))
 	if err != nil {
 		klog.Fatalf("Failed to create a Container Manager: %s", err)
@@ -162,7 +162,7 @@ func main() {
 		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
 		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
 	}
-	klog.Infof("555555555555")
+	fmt.Println("555555555555")
 	// Register all HTTP handlers.
 	err = cadvisorhttp.RegisterHandlers(mux, containerManager, *httpAuthFile, *httpAuthRealm, *httpDigestFile, *httpDigestRealm, *urlBasePrefix)
 	if err != nil {
@@ -176,12 +176,12 @@ func main() {
 	}
 
 	cadvisorhttp.RegisterPrometheusHandler(mux, containerManager, *prometheusEndpoint, containerLabelFunc, includedMetrics)
-	klog.Infof("666666666666")
+	fmt.Println("666666666666")
 	// Start the manager.
 	if err := containerManager.Start(); err != nil {
 		klog.Fatalf("Failed to start container manager: %v", err)
 	}
-	klog.Infof("777777777777")
+	fmt.Println("777777777777")
 	// Install signal handler.
 	installSignalHandler(containerManager)
 
@@ -189,7 +189,7 @@ func main() {
 
 	time.Sleep(5 * time.Second)
 	infos, err := getCadvisorContainerInfo(containerManager)
-	klog.Infof("======>err: %v", err)
+	fmt.Println("======>err: %v", err)
 	for k, v := range infos {
 		klog.Infof("key: %v", k)
 		pretty_v, _ := json.MarshalIndent(v, "", "\t")
