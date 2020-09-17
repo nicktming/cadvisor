@@ -43,6 +43,7 @@ import (
 	_ "github.com/google/cadvisor/utils/cloudinfo/gce"
 
 	"k8s.io/klog/v2"
+	"encoding/json"
 )
 
 var argIp = flag.String("listen_ip", "", "IP to listen on, defaults to all IPs")
@@ -208,6 +209,18 @@ func main() {
 	installSignalHandler(resourceManager)
 
 	klog.V(1).Infof("Starting cAdvisor version: %s-%s on port %d", version.Info["version"], version.Info["revision"], *argPort)
+
+
+	time.Sleep(5 * time.Second)
+	maps, err := GetCadvisorContainerInfo(resourceManager)
+	if err != nil {
+		panic(err)
+	}
+	for k, v := range maps {
+		fmt.Printf("key: %v\n", k)
+		pretty_v, _ := json.MarshalIndent(v, "", "\t")
+		fmt.Printf("value: %v\n", string(pretty_v))
+	}
 
 	rootMux := http.NewServeMux()
 	rootMux.Handle(*urlBasePrefix+"/", http.StripPrefix(*urlBasePrefix, mux))

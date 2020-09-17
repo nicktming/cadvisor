@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	maps, err := getCadvisorContainerInfo(client)
+	maps, err := GetCadvisorContainerInfo(client)
 	if err != nil {
 		panic(err)
 	}
@@ -32,7 +32,7 @@ func main() {
 }
 
 
-func getCadvisorContainerInfo(ca cadvisor.Interface) (map[string]cadvisorapiv2.ContainerInfo, error) {
+func GetCadvisorContainerInfo(ca cadvisor.Interface) (map[string]cadvisorapiv2.ContainerInfo, error) {
 	infos, err := ca.ContainerInfoV2("/", cadvisorapiv2.RequestOptions{
 		IdType:    cadvisorapiv2.TypeName,
 		Count:     2, // 2 samples are needed to compute "instantaneous" CPU

@@ -61,6 +61,6 @@ func Client() (*dclient.Client, error) {
 			nil)
 
 	})
-	log.Printf("======>dockerClientErr: %v\n", dockerClientErr)
+	//log.Printf("======>dockerClientErr: %v\n", dockerClientErr)
 	return dockerClient, dockerClientErr
 }

@@ -188,8 +188,8 @@ func newDockerContainerHandler(
 		return nil, fmt.Errorf("failed to inspect container %q: %v", id, err)
 	}
 
-	pretty_containerStatus, _ := json.MarshalIndent(ctnr, "", "\t")
-	fmt.Printf("===>getPhase pretty_containerStatus: %v", string(pretty_containerStatus))
+	//pretty_containerStatus, _ := json.MarshalIndent(ctnr, "", "\t")
+	//fmt.Printf("===>getPhase pretty_containerStatus: %v", string(pretty_containerStatus))
 
 	// TODO: extract object mother method
 	handler := &dockerContainerHandler{
