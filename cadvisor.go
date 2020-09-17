@@ -189,10 +189,10 @@ func main() {
 
 	time.Sleep(5 * time.Second)
 	infos, err := getCadvisorContainerInfo(containerManager)
-	fmt.Println("======>err: %v", err)
-	for k, v := range infos {
-		klog.Infof("key: %v", k)
-		pretty_v, _ := json.MarshalIndent(v, "", "\t")
+	fmt.Printf("======>err: %v, infos: %v", err, len(infos))
+	for key, val := range infos {
+		klog.Infof("key: %v", key)
+		pretty_v, _ := json.MarshalIndent(val, "", "\t")
 		klog.Infof("value: %v", string(pretty_v))
 	}
 
