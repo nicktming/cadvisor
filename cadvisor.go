@@ -191,9 +191,9 @@ func main() {
 	infos, err := getCadvisorContainerInfo(containerManager)
 	fmt.Printf("======>err: %v, infos: %v", err, len(infos))
 	for key, val := range infos {
-		klog.Infof("key: %v", key)
+		fmt.Printf("key: %v\n", key)
 		pretty_v, _ := json.MarshalIndent(val, "", "\t")
-		klog.Infof("value: %v", string(pretty_v))
+		fmt.Printf("value: %v\n", string(pretty_v))
 	}
 
 	rootMux := http.NewServeMux()
