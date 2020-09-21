@@ -243,6 +243,9 @@ func newDockerContainerHandler(
 
 	handler.ipAddress = ipAddress
 
+	fmt.Printf("============>rootfsStorageDir: %v, otherStorageDir: %v, fsInfo: %v\n",
+		rootfsStorageDir, otherStorageDir, fsInfo)
+
 	if includedMetrics.Has(container.DiskUsageMetrics) {
 		handler.fsHandler = &dockerFsHandler{
 			fsHandler:       common.NewFsHandler(common.DefaultPeriod, rootfsStorageDir, otherStorageDir, fsInfo),

@@ -61,11 +61,11 @@ func (fh *realFsHandler) update() error {
 	)
 	if fh.rootfs != "" {
 		rootUsage, rootErr = fh.fsInfo.GetDirUsage(fh.rootfs)
-		klog.Infof("rootfs: %v, rootUsage: %v", fh.rootfs, rootUsage)
+		klog.Infof("======>rootfs: %v, rootUsage: %v", fh.rootfs, rootUsage)
 	}
 	if fh.extraDir != "" {
 		extraUsage, extraErr = fh.fsInfo.GetDirUsage(fh.extraDir)
-		klog.Infof("extraDir: %v, extraUsage: %v", fh.extraDir, extraUsage)
+		klog.Infof("======>extraDir: %v, extraUsage: %v", fh.extraDir, extraUsage)
 	}
 
 	fh.Lock()
