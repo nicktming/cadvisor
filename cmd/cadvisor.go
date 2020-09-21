@@ -16,7 +16,7 @@ import (
 	"fmt"
 
 	// Register container providers
-	//_ "github.com/google/cadvisor/cmd/internal/container/install"
+	_ "github.com/google/cadvisor/cmd/internal/container/install"
 	//"os/user"
 	//"github.com/google/cadvisor/container/docker"
 )
