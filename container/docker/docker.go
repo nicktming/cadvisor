@@ -28,6 +28,7 @@ import (
 	"github.com/google/cadvisor/info/v1"
 
 	"k8s.io/klog"
+	"encoding/json"
 )
 
 var dockerTimeout = 10 * time.Second
@@ -124,6 +125,9 @@ func ValidateInfo() (*dockertypes.Info, error) {
 	}
 
 	dockerInfo, err := client.Info(defaultContext())
+	pretty_dockerInfo, _ := json.MarshalIndent(dockerInfo, "", "\t")
+	klog.Infof("=========>pretty_dockerInfo: %v", string(pretty_dockerInfo))
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to detect Docker info: %v", err)
 	}
