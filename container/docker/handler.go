@@ -36,6 +36,8 @@ import (
 	docker "github.com/docker/docker/client"
 	"golang.org/x/net/context"
 	"k8s.io/klog"
+	"encoding/json"
+	"log"
 )
 
 const (
@@ -186,6 +188,9 @@ func newDockerContainerHandler(
 	if err != nil {
 		return nil, fmt.Errorf("failed to inspect container %q: %v", id, err)
 	}
+
+	pretty_ctnr, _ := json.MarshalIndent(ctnr, "", "\t")
+	log.Printf("pretty_ctnr: %v\n", string(pretty_ctnr))
 
 	// TODO: extract object mother method
 	handler := &dockerContainerHandler{
