@@ -109,6 +109,9 @@ func getRwLayerID(containerID, storageDir string, sd storageDriver, dockerVersio
 	}
 
 	bytes, err := ioutil.ReadFile(path.Join(storageDir, "image", string(sd), "layerdb", "mounts", containerID, rwLayerIDFile))
+
+	fmt.Printf("==========>gtRwLayerID path: %v\n", path.Join(storageDir, "image", string(sd), "layerdb", "mounts", containerID, rwLayerIDFile))
+
 	if err != nil {
 		return "", fmt.Errorf("failed to identify the read-write layer ID for container %q. - %v", containerID, err)
 	}
@@ -243,8 +246,8 @@ func newDockerContainerHandler(
 
 	handler.ipAddress = ipAddress
 
-	fmt.Printf("============>rootfsStorageDir: %v, otherStorageDir: %v, fsInfo: %v\n",
-		rootfsStorageDir, otherStorageDir, fsInfo)
+	fmt.Printf("============>rootfsStorageDir: %v, otherStorageDir: %v\n",
+		rootfsStorageDir, otherStorageDir)
 
 	if includedMetrics.Has(container.DiskUsageMetrics) {
 		handler.fsHandler = &dockerFsHandler{
